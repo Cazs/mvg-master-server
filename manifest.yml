@@ -1,0 +1,10 @@
+---
+applications:
+- name: omega-bms-rest-server
+  memory: 256M
+  instances: 1
+  host: rest-service
+  domain: omegafs.co.za
+  path: build/libs/omega-bms-rest-server-0.1.0.jar
+  server:
+    port: 8083
