@@ -11,8 +11,7 @@ import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurerAdapter;
 import server.auxilary.RemoteComms;
-import server.model.Enquiry;
-import server.model.User;
+import server.model.*;
 
 import java.net.UnknownHostException;
 
@@ -44,6 +43,10 @@ public class AppConfig  extends RepositoryRestConfigurerAdapter
     {
         config.exposeIdsFor(User.class);
         config.exposeIdsFor(Enquiry.class);
+        config.exposeIdsFor(Resource.class);
+        config.exposeIdsFor(Type.class);
+        config.exposeIdsFor(ResourceType.class);
+        config.exposeIdsFor(Quote.class);
     }
     /*@Bean
     public Mongo mongo() throws Exception
