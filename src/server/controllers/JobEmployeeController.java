@@ -15,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.auxilary.IO;
 import server.auxilary.RemoteComms;
-import server.exceptions.InvalidBusinessObjectException;
+import server.exceptions.InvalidMVGObjectException;
 import server.model.JobEmployee;
 import server.repositories.JobEmployeeRepository;
 
@@ -61,9 +61,9 @@ public class JobEmployeeController
         {
             try
             {
-                String new_job_employee_id = RemoteComms.commitBusinessObjectToDatabase(job_employee, "job_employees", "jobs_timestamp");
+                String new_job_employee_id = RemoteComms.commitMVGObjectToDatabase(job_employee, "job_employees", "jobs_timestamp");
                 return new ResponseEntity<>(new_job_employee_id, HttpStatus.OK);
-            } catch (InvalidBusinessObjectException e)
+            } catch (InvalidMVGObjectException e)
             {
                 IO.log(Remote.class.getName(),IO.TAG_ERROR, "invalid JobEmployee object: {"+e.getMessage()+"}");
                 return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);

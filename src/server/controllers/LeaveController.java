@@ -53,13 +53,13 @@ public class LeaveController
     public ResponseEntity<String> addLeaveRecord(@RequestBody Leave leave)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Leave record creation request");
-        return APIController.putBusinessObject(leave, "leave_records", "leave_records_timestamp");
+        return APIController.putMVGObject(leave, "leave_records", "leave_records_timestamp");
     }
 
     @PostMapping
     public ResponseEntity<String> patchLeaveRecord(@RequestBody Leave leave)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Leave record update request.");
-        return APIController.patchBusinessObject(leave, "leave_records", "leave_records_timestamp");
+        return APIController.patchMVGObject(leave, "leave_records", "leave_records_timestamp");
     }
 }

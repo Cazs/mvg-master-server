@@ -54,13 +54,13 @@ public class FileMetadataController
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling FileMetadata creation request.");
         //HttpHeaders headers = new HttpHeaders();
-        return APIController.putBusinessObject(file_metadata, "file_metadata", "file_metadata_timestamp");
+        return APIController.putMVGObject(file_metadata, "file_metadata", "file_metadata_timestamp");
     }
 
     @PostMapping
     public ResponseEntity<String> patchExpense(@RequestBody FileMetadata file_metadata)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling FileMetadata update request.");
-        return APIController.patchBusinessObject(file_metadata, "file_metadata", "file_metadata_timestamp");
+        return APIController.patchMVGObject(file_metadata, "file_metadata", "file_metadata_timestamp");
     }
 }

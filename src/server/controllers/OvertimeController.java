@@ -53,13 +53,13 @@ public class OvertimeController
     public ResponseEntity<String> addOvertimeRecords(@RequestBody Overtime overtime)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Overtime record creation request");
-        return APIController.putBusinessObject(overtime, "overtime_records", "overtime_records_timestamp");
+        return APIController.putMVGObject(overtime, "overtime_records", "overtime_records_timestamp");
     }
 
     @PostMapping
     public ResponseEntity<String> patchOvertime(@RequestBody Overtime overtime)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Overtime record update request.");
-        return APIController.patchBusinessObject(overtime, "overtime_records", "overtime_records_timestamp");
+        return APIController.patchMVGObject(overtime, "overtime_records", "overtime_records_timestamp");
     }
 }

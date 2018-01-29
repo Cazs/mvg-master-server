@@ -53,13 +53,13 @@ public class SupplierController
     public ResponseEntity<String> addSupplier(@RequestBody Supplier supplier)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Supplier creation request.");
-        return APIController.putBusinessObject(supplier, "suppliers", "suppliers_timestamp");
+        return APIController.putMVGObject(supplier, "suppliers", "suppliers_timestamp");
     }
 
     @PostMapping
     public ResponseEntity<String> patchSupplier(@RequestBody Supplier supplier)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Supplier update request.");
-        return APIController.patchBusinessObject(supplier, "suppliers", "suppliers_timestamp");
+        return APIController.patchMVGObject(supplier, "suppliers", "suppliers_timestamp");
     }
 }

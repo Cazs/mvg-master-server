@@ -55,14 +55,14 @@ public class PurchaseOrderController
     public ResponseEntity<String> addPurchaseOrder(@RequestBody PurchaseOrder purchase_order)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling PurchaseOrder creation request");
-        return APIController.putBusinessObject(purchase_order, "purchase_orders", "purchase_orders_timestamp");
+        return APIController.putMVGObject(purchase_order, "purchase_orders", "purchase_orders_timestamp");
     }
 
     @PostMapping
     public ResponseEntity<String> patchPurchaseOrder(@RequestBody PurchaseOrder purchase_order)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling PurchaseOrder update request.");
-        return APIController.patchBusinessObject(purchase_order, "purchase_orders", "purchase_orders_timestamp");
+        return APIController.patchMVGObject(purchase_order, "purchase_orders", "purchase_orders_timestamp");
     }
 
     @PostMapping("/approval_request")//, consumes = "text/plain"//value =//, produces = "application/pdf"
@@ -71,13 +71,13 @@ public class PurchaseOrderController
                                                      @RequestBody FileMetadata fileMetadata)//, @RequestParam("file") MultipartFile file
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling PurchaseOrder approval request.");
-        return APIController.requestBusinessObjectApproval(purchaseorder_id, session_id, message, subject, fileMetadata, new PurchaseOrder().apiEndpoint(), PurchaseOrder.class);
+        return APIController.requestMVGObjectApproval(purchaseorder_id, session_id, message, subject, fileMetadata, new PurchaseOrder().apiEndpoint(), PurchaseOrder.class);
     }
 
     @GetMapping("/approve/{purchaseorder_id}/{vericode}")
     public ResponseEntity<String> approvePurchaseOrder(@PathVariable("purchaseorder_id") String purchaseorder_id, @PathVariable("vericode") String vericode)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling PurchaseOrder "+purchaseorder_id+" approval request by Vericode.");
-        return APIController.approveBusinessObjectByVericode(purchaseorder_id, vericode, "purchase_orders", "purchase_orders_timestamp", PurchaseOrder.class);
+        return APIController.approveMVGObjectByVericode(purchaseorder_id, vericode, "purchase_orders", "purchase_orders_timestamp", PurchaseOrder.class);
     }
 }

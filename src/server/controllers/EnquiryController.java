@@ -57,14 +57,14 @@ public class EnquiryController
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Enquiry creation request.");
         //HttpHeaders headers = new HttpHeaders();
-        return APIController.putBusinessObject(enquiry, "enquiries", "enquiries_timestamp");
+        return APIController.putMVGObject(enquiry, "enquiries", "enquiries_timestamp");
     }
 
     @PostMapping("/enquiries")
     public ResponseEntity<String> patchEnquiry(@RequestBody Enquiry enquiry)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Enquiry update request.");
-        return APIController.patchBusinessObject(enquiry, "enquiries", "enquiries_timestamp");
+        return APIController.patchMVGObject(enquiry, "enquiries", "enquiries_timestamp");
     }
 
     @PostMapping(value = "/enquiries/approval_request")//, consumes = "text/plain"//value =//, produces = "application/pdf"
@@ -73,13 +73,13 @@ public class EnquiryController
                                                        @RequestBody FileMetadata fileMetadata)//, @RequestParam("file") MultipartFile file
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Enquiry approval request.");
-        return APIController.requestBusinessObjectApproval(enquiry_id, session_id, message, subject, fileMetadata, new Enquiry().apiEndpoint(), Enquiry.class);
+        return APIController.requestMVGObjectApproval(enquiry_id, session_id, message, subject, fileMetadata, new Enquiry().apiEndpoint(), Enquiry.class);
     }
 
     @GetMapping("/enquiries/approve/{enquiry_id}/{vericode}")
     public ResponseEntity<String> approveEnquiry(@PathVariable("enquiry_id") String enquiry_id, @PathVariable("vericode") String vericode)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Enquiry "+enquiry_id+" approval request by Vericode.");
-        return APIController.approveBusinessObjectByVericode(enquiry_id, vericode, "enquiries", "enquiries_timestamp", Enquiry.class);
+        return APIController.approveMVGObjectByVericode(enquiry_id, vericode, "enquiries", "enquiries_timestamp", Enquiry.class);
     }
 }

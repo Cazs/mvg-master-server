@@ -53,13 +53,13 @@ public class InvoiceController
     public ResponseEntity<String> addInvoice(@RequestBody Invoice invoice)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Invoice creation request");
-        return APIController.putBusinessObject(invoice, "invoices", "invoices_timestamp");
+        return APIController.putMVGObject(invoice, "invoices", "invoices_timestamp");
     }
 
     @PostMapping
     public ResponseEntity<String> patchInvoice(@RequestBody Invoice invoice)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Invoice update request.");
-        return APIController.patchBusinessObject(invoice, "invoices", "invoices_timestamp");
+        return APIController.patchMVGObject(invoice, "invoices", "invoices_timestamp");
     }
 }

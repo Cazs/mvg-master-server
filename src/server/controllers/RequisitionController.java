@@ -54,13 +54,13 @@ public class RequisitionController
     public ResponseEntity<String> addRequisitionRecord(@RequestBody Requisition requisition)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Requisition creation request");
-        return APIController.putBusinessObject(requisition, "requisitions", "requisitions_timestamp");
+        return APIController.putMVGObject(requisition, "requisitions", "requisitions_timestamp");
     }
 
     @PostMapping
     public ResponseEntity<String> patchRequisitionRecord(@RequestBody Requisition requisition)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Requisition update request.");
-        return APIController.patchBusinessObject(requisition, "requisitions", "requisitions_timestamp");
+        return APIController.patchMVGObject(requisition, "requisitions", "requisitions_timestamp");
     }
 }

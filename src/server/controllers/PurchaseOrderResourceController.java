@@ -53,13 +53,13 @@ public class PurchaseOrderResourceController
     public ResponseEntity<String> addPurchaseOrderResource(@RequestBody PurchaseOrderResource purchase_order_resource)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling PurchaseOrderResource creation request");
-        return APIController.putBusinessObject(purchase_order_resource, "purchase_order_resources", "purchase_orders_timestamp");
+        return APIController.putMVGObject(purchase_order_resource, "purchase_order_resources", "purchase_orders_timestamp");
     }
 
     @PostMapping
     public ResponseEntity<String> patchPurchaseOrderResource(@RequestBody PurchaseOrderResource purchase_order_resource)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling PurchaseOrderResource update request.");
-        return APIController.patchBusinessObject(purchase_order_resource, "purchase_order_resources", "purchase_orders_timestamp");
+        return APIController.patchMVGObject(purchase_order_resource, "purchase_order_resources", "purchase_orders_timestamp");
     }
 }

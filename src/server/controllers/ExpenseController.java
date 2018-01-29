@@ -54,13 +54,13 @@ public class ExpenseController
         {
             IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Expense creation request.");
             //HttpHeaders headers = new HttpHeaders();
-            return APIController.putBusinessObject(expense, "expenses", "expenses_timestamp");
+            return APIController.putMVGObject(expense, "expenses", "expenses_timestamp");
         }
 
         @PostMapping
         public ResponseEntity<String> patchExpense(@RequestBody Expense expense)
         {
             IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Expense update request.");
-            return APIController.patchBusinessObject(expense, "expenses", "expenses_timestamp");
+            return APIController.patchMVGObject(expense, "expenses", "expenses_timestamp");
         }
 }

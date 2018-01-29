@@ -54,13 +54,13 @@ public class ResourceTypeController
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling ResourceType creation request.");
         //HttpHeaders headers = new HttpHeaders();
-        return APIController.putBusinessObject(resource_type, "resource_types", "resources_timestamp");
+        return APIController.putMVGObject(resource_type, "resource_types", "resources_timestamp");
     }
 
     @PostMapping
     public ResponseEntity<String> patchResource(@RequestBody ResourceType resource_type)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling ResourceType update request.");
-        return APIController.patchBusinessObject(resource_type, "resource_types", "resources_timestamp");
+        return APIController.patchMVGObject(resource_type, "resource_types", "resources_timestamp");
     }
 }

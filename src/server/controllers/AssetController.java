@@ -54,13 +54,13 @@ public class AssetController
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Asset creation request.");
         //HttpHeaders headers = new HttpHeaders();
-        return APIController.putBusinessObject(asset, "assets", "assets_timestamp");
+        return APIController.putMVGObject(asset, "assets", "assets_timestamp");
     }
 
     @PostMapping
     public ResponseEntity<String> patchAsset(@RequestBody Asset asset)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Asset update request.");
-        return APIController.patchBusinessObject(asset, "assets", "assets_timestamp");
+        return APIController.patchMVGObject(asset, "assets", "assets_timestamp");
     }
 }

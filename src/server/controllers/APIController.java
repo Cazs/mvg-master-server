@@ -13,8 +13,8 @@ import server.auxilary.AccessLevels;
 import server.auxilary.IO;
 import server.auxilary.RemoteComms;
 import server.auxilary.Session;
-import server.exceptions.EmployeeNotFoundException;
-import server.exceptions.InvalidBusinessObjectException;
+import server.exceptions.UserNotFoundException;
+import server.exceptions.InvalidMVGObjectException;
 import server.managers.SessionManager;
 import server.model.*;
 
@@ -44,14 +44,11 @@ public class APIController
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "handling auth request.");
         String session_id = null;
-        System.out.println(">>>>>>Validating User: " + usr+":"+pwd);
-        List<User> users =  IO.getInstance().mongoOperations().find(
-                new Query(Criteria.where("usr").is(usr).and("pwd").is(pwd)), User.class, "users");
-        if(users !=null)
+        List<User> users =  IO.getInstance().mongoOperations().find(new Query(Criteria.where("usr").is(usr).and("pwd").is(pwd)), User.class, "users");
+        if(users!=null)
         {
             if(users.size()==1)
             {
-                //"HG58YZ3CR9"
                 session_id = IO.generateRandomString(16);
                 //found valid usr to pwd match, create session
                 Session session = new Session();
@@ -60,15 +57,54 @@ public class APIController
                 session.setDate(System.currentTimeMillis());
                 session.setTtl(RemoteComms.TTL);
                 SessionManager.getInstance().addSession(session);
+                IO.log(getClass().getName(), IO.TAG_INFO, "user ["+session.getUsr()+"] signed in.");
                 return session.toString();
             } else if(users.size()!=1)
-                throw new EmployeeNotFoundException();
-        } else//List is null, no Employees found
-            throw new EmployeeNotFoundException();
+                throw new UserNotFoundException();
+        } else//List is null, no users found
+            throw new UserNotFoundException();
         return "Incorrect User credentials.";
     }
 
-    public static ResponseEntity<String> requestBusinessObjectApproval(String _id, String session_id, String message,
+    public static ResponseEntity<String> emailMVGObject(String _id, String session_id, String message,
+                                                             String subject, String destination, FileMetadata fileMetadata, Class model)//, @RequestParam("file") MultipartFile file
+    {
+        if(fileMetadata==null)
+            return new ResponseEntity<>("Invalid attached FileMetadata object.", HttpStatus.CONFLICT);
+        if(session_id!=null)
+        {
+            Session user_session = SessionManager.getInstance().getUserSession(session_id);
+            if(user_session!=null)
+            {
+                if(_id!=null)
+                {
+                    if(fileMetadata.getFile()!=null)
+                    {
+                        try
+                        {
+                            //check if destination param contains multiple emails
+                            String[] email_addresses = destination.split(",");
+                            //Send email
+                            MailjetResponse response = RemoteComms.emailWithAttachment(subject, message, email_addresses, new FileMetadata[]{fileMetadata});
+                            if(response==null)
+                                return new ResponseEntity<>("Could not send email.", HttpStatus.CONFLICT);
+                            else return new ResponseEntity<>("eMail has been sent successfully.", HttpStatus.valueOf(response.getStatus()));
+                        } catch (MailjetSocketTimeoutException e)
+                        {
+                            IO.log(APIController.class.getName(), IO.TAG_ERROR, e.getMessage());
+                            return new ResponseEntity<>("Could not send eMail: "+e.getMessage(), HttpStatus.CONFLICT);
+                        } catch (MailjetException e)
+                        {
+                            IO.log(APIController.class.getName(), IO.TAG_ERROR, e.getMessage());
+                            return new ResponseEntity<>("Could not send eMail: "+e.getMessage(), HttpStatus.CONFLICT);
+                        }
+                    } else return new ResponseEntity<>("Invalid attached MVGObject{"+model.getName()+"["+_id+"]} PDF", HttpStatus.CONFLICT);
+                } else return new ResponseEntity<>("Invalid _id param", HttpStatus.CONFLICT);
+            } else return new ResponseEntity<>("Invalid user session. Please log in.", HttpStatus.CONFLICT);
+        } else return new ResponseEntity<>("Invalid session_id header param", HttpStatus.CONFLICT);
+    }
+
+    public static ResponseEntity<String> requestMVGObjectApproval(String _id, String session_id, String message,
                                                                        String subject, FileMetadata fileMetadata, String endpoint, Class model)//, @RequestParam("file") MultipartFile file
     {
         if(fileMetadata==null)
@@ -90,34 +126,34 @@ public class APIController
                         vericode.setCreator(user_session.getUsr());
 
                         //save Vericode object
-                        String new_vericode_id = APIController.putBusinessObject(vericode, "vericodes", "vericodes_timestamp").getBody();
+                        String new_vericode_id = APIController.putMVGObject(vericode, "vericodes", "vericodes_timestamp").getBody();
 
                         try
                         {
-                            IO.log(APIController.class.getName(), IO.TAG_INFO, "Looking for Employees with approval clearance.");
-                            //look for Employees with enough clearance for approval
+                            IO.log(APIController.class.getName(), IO.TAG_INFO, "Looking for Users with approval clearance.");
+                            //look for Users with enough clearance for approval
                             List<User> auth_users = IO.getInstance().mongoOperations().find(
                                     new Query(Criteria.where("access_level").gte(AccessLevels.SUPERUSER.getLevel())),
-                                    User.class, "employees");
+                                    User.class, "users");
 
-                            //check if any Employees were found
-                            if(auth_users ==null)
-                                return new ResponseEntity<>("Could not find any Employees with approval clearance.", HttpStatus.CONFLICT);
+                            //check if any Users were found
+                            if(auth_users==null)
+                                return new ResponseEntity<>("Could not find any Users with approval clearance.", HttpStatus.CONFLICT);
                             if(auth_users.isEmpty())
-                                return new ResponseEntity<>("Could not find any Employees with approval clearance.", HttpStatus.CONFLICT);
+                                return new ResponseEntity<>("Could not find any Users with approval clearance.", HttpStatus.CONFLICT);
 
-                            IO.log(APIController.class.getName(), IO.TAG_INFO, "Found ["+ auth_users.size()+"] Employees with clearance. Sending[eMailing] MVGObject{"+model.getName()+"["+_id+"]} for approval.");
-                            User[] auth_employees_arr = new User[auth_users.size()];
-                            auth_users.toArray(auth_employees_arr);
+                            IO.log(APIController.class.getName(), IO.TAG_INFO, "Found ["+auth_users.size()+"] Users with clearance. Sending[eMailing] MVGObject{"+model.getName()+"["+_id+"]} for approval.");
+                            User[] auth_users_arr = new User[auth_users.size()];
+                            auth_users.toArray(auth_users_arr);
 
                             //create approval link
                             message += "<br/><h3 style=\"text-align:center;\">" +
                                     "Click <a href=\""
                                     +RemoteComms.host+endpoint+"/approve/"+_id+"/"+vericode.getCode()
-                                    +"\">here</a> to approve this "+model.getName()+".</h3>";
+                                    +"\">here</a> to approve this "+model.getSimpleName()+".</h3>";
                             //Send email with approval link
                             MailjetResponse response = RemoteComms.emailWithAttachment(subject, message,
-                                                                    auth_employees_arr, new FileMetadata[]{fileMetadata});
+                                    auth_users_arr, new FileMetadata[]{fileMetadata});
                             if(response==null)
                                 return new ResponseEntity<>("Could not send email for approval.", HttpStatus.CONFLICT);
                             else return new ResponseEntity<>(String.valueOf(response.getStatus()), HttpStatus.valueOf(response.getStatus()));
@@ -136,7 +172,7 @@ public class APIController
         } else return new ResponseEntity<>("Invalid session_id header param", HttpStatus.CONFLICT);
     }
 
-    public static ResponseEntity<String> approveBusinessObjectByVericode(String _id, String vericode, String collection, String collection_timestamp, Class model)
+    public static ResponseEntity<String> approveMVGObjectByVericode(String _id, String vericode, String collection, String collection_timestamp, Class model)
     {
         List<Vericode> contents = IO.getInstance().mongoOperations().find(new Query(Criteria.where("code_name").is(_id).and("code").is(vericode)), Vericode.class, "vericodes");
         String response_msg = "<!DOCTYPE html><html>";
@@ -156,7 +192,7 @@ public class APIController
 
                         MVGObject MVGObject = MVGObjects.get(0);
                         MVGObject.parse("status", MVGObject.STATUS_APPROVED);
-                        HttpStatus status = APIController.patchBusinessObject(MVGObject, collection, collection_timestamp).getStatusCode();
+                        HttpStatus status = APIController.patchMVGObject(MVGObject, collection, collection_timestamp).getStatusCode();
 
                         if(status==HttpStatus.OK)
                         {
@@ -185,9 +221,9 @@ public class APIController
         //return response_msg;
     }
 
-    public static ResponseEntity<String> putBusinessObject(MVGObject MVGObject, String collection, String collection_timestamp)
+    public static ResponseEntity<String> putMVGObject(MVGObject MVGObject, String collection, String collection_timestamp)
     {
-        if(MVGObject !=null)
+        if(MVGObject!=null)
         {
             /*if(MVGObject.get_id()==null)
             {
@@ -195,41 +231,39 @@ public class APIController
                 return new ResponseEntity<>("invalid "+MVGObject.getClass().getName()+" _id attribute.", HttpStatus.CONFLICT);
             }*/
 
-            IO.log(APIController.class.getName(), IO.TAG_INFO, "attempting to create new MVGObject ["+ MVGObject.getClass().getName()+"]: "+ MVGObject
-                    .toString()+"");
+            IO.log(APIController.class.getName(), IO.TAG_INFO, "attempting to create new MVGObject ["+MVGObject.getClass().getName()+"]: "+MVGObject.toString()+"");
             try
             {
                 MVGObject.setDate_logged(System.currentTimeMillis());
-                RemoteComms.commitBusinessObjectToDatabase(MVGObject, collection, collection_timestamp);
+                RemoteComms.commitMVGObjectToDatabase(MVGObject, collection, collection_timestamp);
                 return new ResponseEntity<>(MVGObject.get_id(), HttpStatus.OK);
-            } catch (InvalidBusinessObjectException e)
+            } catch (InvalidMVGObjectException e)
             {
-                IO.log(Remote.class.getName(),IO.TAG_ERROR, "invalid "+ MVGObject.getClass().getName()+" object: {"+e.getMessage()+"}");
+                IO.log(Remote.class.getName(),IO.TAG_ERROR, "invalid "+MVGObject.getClass().getName()+" object: {"+e.getMessage()+"}");
                 return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
             }
         }
         return new ResponseEntity<>("Invalid MVGObject", HttpStatus.CONFLICT);
     }
 
-    public static ResponseEntity<String> patchBusinessObject(MVGObject MVGObject, String collection, String collection_timestamp)
+    public static ResponseEntity<String> patchMVGObject(MVGObject MVGObject, String collection, String collection_timestamp)
     {
-        if(MVGObject !=null)
+        if(MVGObject!=null)
         {
             if(MVGObject.get_id()==null)
             {
-                IO.log(Remote.class.getName(),IO.TAG_ERROR, "invalid "+ MVGObject.getClass().getName()+" _id attribute.");
-                return new ResponseEntity<>("invalid "+ MVGObject.getClass().getName()+" _id attribute.", HttpStatus.CONFLICT);
+                IO.log(Remote.class.getName(),IO.TAG_ERROR, "invalid "+MVGObject.getClass().getName()+" _id attribute.");
+                return new ResponseEntity<>("invalid "+MVGObject.getClass().getName()+" _id attribute.", HttpStatus.CONFLICT);
             }
 
-            IO.log(APIController.class.getName(), IO.TAG_INFO, "patching "+ MVGObject
-                    .getClass().getName()+" ["+ MVGObject.get_id()+"]");
+            IO.log(APIController.class.getName(), IO.TAG_INFO, "patching "+MVGObject.getClass().getName()+" ["+MVGObject.get_id()+"]");
             try
             {
-                RemoteComms.commitBusinessObjectToDatabase(MVGObject, collection, collection_timestamp);
+                RemoteComms.commitMVGObjectToDatabase(MVGObject, collection, collection_timestamp);
                 return new ResponseEntity<>(MVGObject.get_id(), HttpStatus.OK);
-            } catch (InvalidBusinessObjectException e)
+            } catch (InvalidMVGObjectException e)
             {
-                IO.log(Remote.class.getName(),IO.TAG_ERROR, "invalid "+ MVGObject.getClass().getName()+" object: {"+e.getMessage()+"}");
+                IO.log(Remote.class.getName(),IO.TAG_ERROR, "invalid "+MVGObject.getClass().getName()+" object: {"+e.getMessage()+"}");
                 return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
             }
         }

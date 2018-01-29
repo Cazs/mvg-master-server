@@ -15,12 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.auxilary.IO;
 import server.auxilary.RemoteComms;
-import server.exceptions.InvalidBusinessObjectException;
-import server.exceptions.InvalidJobException;
-import server.model.Counter;
+import server.exceptions.InvalidMVGObjectException;
 import server.model.FileMetadata;
 import server.model.Job;
-import server.model.Quote;
 import server.repositories.JobRepository;
 
 import java.rmi.Remote;
@@ -64,9 +61,9 @@ public class JobController
         {
             try
             {
-                String new_job_id = RemoteComms.commitBusinessObjectToDatabase(job, "jobs", "jobs_timestamp");
+                String new_job_id = RemoteComms.commitMVGObjectToDatabase(job, "jobs", "jobs_timestamp");
                 return new ResponseEntity<>(new_job_id, HttpStatus.OK);
-            } catch (InvalidBusinessObjectException e)
+            } catch (InvalidMVGObjectException e)
             {
                 IO.log(Remote.class.getName(),IO.TAG_ERROR, "invalid Job object: {"+e.getMessage()+"}");
                 return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
@@ -79,7 +76,7 @@ public class JobController
     public ResponseEntity<String> patchJob(@RequestBody Job job)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Job update request.");
-        return APIController.patchBusinessObject(job, "jobs", "jobs_timestamp");
+        return APIController.patchMVGObject(job, "jobs", "jobs_timestamp");
     }
 
     @PostMapping(value = "/jobs/approval_request")//, consumes = "text/plain"//value =//, produces = "application/pdf"
@@ -88,13 +85,13 @@ public class JobController
                                                        @RequestBody FileMetadata fileMetadata)//, @RequestParam("file") MultipartFile file
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Job approval request.");
-        return APIController.requestBusinessObjectApproval(job_id, session_id, message, subject, fileMetadata, new Job().apiEndpoint(), Job.class);
+        return APIController.requestMVGObjectApproval(job_id, session_id, message, subject, fileMetadata, new Job().apiEndpoint(), Job.class);
     }
 
     @GetMapping("/jobs/approve/{job_id}/{vericode}")
     public ResponseEntity<String> approveJob(@PathVariable("job_id") String job_id, @PathVariable("vericode") String vericode)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Job "+job_id+" approval request by Vericode.");
-        return APIController.approveBusinessObjectByVericode(job_id, vericode, "jobs", "jobs_timestamp", Job.class);
+        return APIController.approveMVGObjectByVericode(job_id, vericode, "jobs", "jobs_timestamp", Job.class);
     }
 }

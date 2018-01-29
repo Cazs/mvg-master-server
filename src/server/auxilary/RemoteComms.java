@@ -5,12 +5,6 @@
  */
 package server.auxilary;
 
-/*import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import fadulousbms.exceptions.LoginException;
-import fadulousbms.managers.SessionManager;
-import fadulousbms.model.MVGObject;
-import fadulousbms.model.Error;*/
 import com.mailjet.client.ClientOptions;
 import com.mailjet.client.MailjetClient;
 import com.mailjet.client.MailjetRequest;
@@ -21,7 +15,7 @@ import com.mailjet.client.resource.Emailv31;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import server.controllers.CounterController;
-import server.exceptions.InvalidBusinessObjectException;
+import server.exceptions.InvalidMVGObjectException;
 import server.model.MVGObject;
 import server.model.Counter;
 import server.model.User;
@@ -102,13 +96,8 @@ public class RemoteComms
         IO.log(TAG, IO.TAG_INFO, String.format("\nGET %s HTTP/1.1", file_url));
 
         URL urlConn = new URL(host + file_url);
-        //URL urlConn = new URL("http://127.0.0.1:9000/api/file/inspection/3-demolition.pdf");
         try(InputStream in = urlConn.openStream())
         {
-            //Files.copy(in, new File("download.pdf").toPath(), StandardCopyOption.REPLACE_EXISTING);
-            //DataInputStream dataInputStream = new DataInputStream(in);
-
-
             ByteArrayOutputStream outbytes = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];
             int read=0;
@@ -119,35 +108,6 @@ public class RemoteComms
             IO.log(TAG, IO.TAG_INFO, "GET received file> " + file_url + " " + outbytes.toByteArray().length + " bytes.\n");
             return outbytes.toByteArray();
         }
-        //URL urlConn = new URL(host);
-        /*HttpURLConnection httpConn =  (HttpURLConnection)urlConn.openConnection();
-
-        for(AbstractMap.SimpleEntry<String,String> header:headers)
-            httpConn.setRequestProperty(header.getKey() , header.getValue());
-
-
-        String response = null;
-        if(httpConn.getResponseCode() == HttpURLConnection.HTTP_OK)
-        {
-            response="";
-            DataInputStream in = new DataInputStream(httpConn.getInputStream());
-
-            ByteArrayOutputStream outbytes = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            int read=0;
-            while ((read=in.read(buffer, 0, buffer.length))>0)
-            {
-                outbytes.write(buffer, 0, read);
-            }
-            outbytes.flush();
-            in.close();
-            IO.log(TAG, IO.TAG_INFO, "GET received file> " + filename + " " + outbytes.toByteArray().length + "bytes.\n");
-            return outbytes.toByteArray();
-        }else
-        {
-            IO.log(TAG, IO.TAG_ERROR, IO.readStream(httpConn.getErrorStream()));
-            return null;
-        }*/
     }
     
     public static HttpURLConnection postData(String function, ArrayList<AbstractMap.SimpleEntry<String,String>> params, ArrayList<AbstractMap.SimpleEntry<String,String>> headers) throws IOException
@@ -189,16 +149,6 @@ public class RemoteComms
         writer.flush();
         writer.close();
         os.close();
-
-        //httpConn.connect();
-        
-        /*Scanner scn = new Scanner(new InputStreamReader(httpConn.getErrorStream()));
-        String resp = "";
-        while(scn.hasNext())
-            resp+=scn.nextLine();
-        System.err.println(resp);*
-        String resp = httpConn.getHeaderField("Set-Cookie");
-        System.err.println(resp);*/
         
         return httpConn;
     }
@@ -259,7 +209,7 @@ public class RemoteComms
         httpConn.disconnect();
     }
 
-    public static String commitBusinessObjectToDatabase(MVGObject MVGObject, String collection, String timestamp_name)
+    public static String commitMVGObjectToDatabase(MVGObject MVGObject, String collection, String timestamp_name)
     {
         if(MVGObject !=null)
         {
@@ -292,8 +242,8 @@ public class RemoteComms
                     CounterController.commitCounter(new Counter(timestamp_name, System.currentTimeMillis()));
                 else return null;
                 return MVGObject.get_id();
-            } else throw new InvalidBusinessObjectException(is_valid[1]);
-        } else throw new InvalidBusinessObjectException("invalid[null] MVGObject.");
+            } else throw new InvalidMVGObjectException(is_valid[1]);
+        } else throw new InvalidMVGObjectException("invalid[null] MVGObject.");
     }
 
     /**
@@ -334,15 +284,65 @@ public class RemoteComms
                         .put(new JSONObject()
                                 .put(Emailv31.Message.FROM, new JSONObject()
                                         .put("Email", SYSTEM_EMAIL)
-                                        .put("Name", "BMS"))
+                                        .put("Name", "MVG"))
                                 .put(Emailv31.Message.TO, recipients)
+                                .put(Emailv31.Message.SUBJECT, subject)
+                                .put(Emailv31.Message.HTMLPART, message)
+                                .put(Emailv31.Message.ATTACHMENTS, files)));
+        response = client.post(request);
+        IO.log(RemoteComms.class.getName(), IO.TAG_ERROR, response.getStatus()+": " +response.getData());
+        return response;
+    }
+
+    /**
+     *
+     * @param subject email subject
+     * @param message email message
+     * @param recipient_addresses recipient email addresses
+     * @param fileMetadata email attachment files
+     * @return Mailjet email send response object
+     * @throws MailjetSocketTimeoutException
+     * @throws MailjetException
+     */
+    public static MailjetResponse emailWithAttachment(String subject, String message, String[] recipient_addresses, FileMetadata[] fileMetadata) throws MailjetSocketTimeoutException, MailjetException
+    {
+        MailjetClient client;
+        MailjetRequest request;
+        MailjetResponse response;
+
+        //setup recipients
+        JSONArray recipients_json = new JSONArray();
+        for(String recipient:recipient_addresses)
+        {
+            recipients_json.put(new JSONObject()
+                    .put("Email", recipient));
+            //.put("Name", recipient));//recipient.getFirstname()+" "+recipient.getLastname()
+        }
+
+        //setup files to be emailed
+        JSONArray files = new JSONArray();
+        for(FileMetadata file: fileMetadata)
+            files.put(new JSONObject()
+                    .put("ContentType", file.getContent_type())
+                    .put("Filename", file.getFilename())
+                    .put("Base64Content", file.getFile()));//"VGhpcyBpcyB5b3VyIGF0dGFjaGVkIGZpbGUhISEK"
+
+
+        client = new MailjetClient("f8d3d1d74c95250bb2119063b3697082", "8304b30da4245632c878bf48f1d65d92", new ClientOptions("v3.1"));
+        request = new MailjetRequest(Emailv31.resource)
+                .property(Emailv31.MESSAGES, new JSONArray()
+                        .put(new JSONObject()
+                                .put(Emailv31.Message.FROM, new JSONObject()
+                                        .put("Email", SYSTEM_EMAIL)
+                                        .put("Name", "BMS"))
+                                .put(Emailv31.Message.TO, recipients_json)
                                 .put(Emailv31.Message.SUBJECT, subject)
                                 //.put(Emailv31.Message.TEXTPART, "Dear passenger 1, welcome to Mailjet! May the delivery force be with you!")
                                 .put(Emailv31.Message.HTMLPART, message)
                                 .put(Emailv31.Message.ATTACHMENTS, files)));
         response = client.post(request);
-        System.out.println(response.getStatus());
-        System.out.println(response.getData());
+        IO.log(RemoteComms.class.getName(), IO.TAG_INFO, String.valueOf(response.getStatus()));
+        IO.log(RemoteComms.class.getName(), IO.TAG_INFO, String.valueOf(response.getData()));
         return response;
     }
 }

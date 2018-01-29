@@ -55,14 +55,14 @@ public class QuoteController
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Quote creation request.");
         //HttpHeaders headers = new HttpHeaders();
-        return APIController.putBusinessObject(quote, "quotes", "quotes_timestamp");
+        return APIController.putMVGObject(quote, "quotes", "quotes_timestamp");
     }
 
     @PostMapping("/quotes")
     public ResponseEntity<String> patchQuote(@RequestBody Quote quote)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Quote update request.");
-        return APIController.patchBusinessObject(quote, "quotes", "quotes_timestamp");
+        return APIController.patchMVGObject(quote, "quotes", "quotes_timestamp");
     }
 
     @PostMapping(value = "/quotes/approval_request")//, consumes = "text/plain"//value =//, produces = "application/pdf"
@@ -71,13 +71,13 @@ public class QuoteController
                                                        @RequestBody FileMetadata fileMetadata)//, @RequestParam("file") MultipartFile file
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Quote approval request.");
-        return APIController.requestBusinessObjectApproval(quote_id, session_id, message, subject, fileMetadata, new Quote().apiEndpoint(), Quote.class);
+        return APIController.requestMVGObjectApproval(quote_id, session_id, message, subject, fileMetadata, new Quote().apiEndpoint(), Quote.class);
     }
 
     @GetMapping("/quotes/approve/{quote_id}/{vericode}")
     public ResponseEntity<String> approveQuote(@PathVariable("quote_id") String quote_id, @PathVariable("vericode") String vericode)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Quote "+quote_id+" approval request by Vericode.");
-        return APIController.approveBusinessObjectByVericode(quote_id, vericode, "quotes", "quotes_timestamp", Quote.class);
+        return APIController.approveMVGObjectByVericode(quote_id, vericode, "quotes", "quotes_timestamp", Quote.class);
     }
 }

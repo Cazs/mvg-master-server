@@ -54,13 +54,13 @@ public class RevenueController
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Revenue creation request.");
         //HttpHeaders headers = new HttpHeaders();
-        return APIController.putBusinessObject(revenue, "revenues", "revenues_timestamp");
+        return APIController.putMVGObject(revenue, "revenues", "revenues_timestamp");
     }
 
     @PostMapping
     public ResponseEntity<String> patchRevenue(@RequestBody Revenue revenue)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Revenue update request.");
-        return APIController.patchBusinessObject(revenue, "revenues", "revenues_timestamp");
+        return APIController.patchMVGObject(revenue, "revenues", "revenues_timestamp");
     }
 }

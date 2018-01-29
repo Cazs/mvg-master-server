@@ -50,13 +50,13 @@ public class ClientController
     public ResponseEntity<String> addClient(@RequestBody Client client)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Client PUT request.");
-        return APIController.putBusinessObject(client, "clients", "clients_timestamp");
+        return APIController.putMVGObject(client, "clients", "clients_timestamp");
     }
 
     @PostMapping
     public ResponseEntity<String> patchClient(@RequestBody Client client)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Client update request.");
-        return APIController.patchBusinessObject(client, "clients", "clients_timestamp");
+        return APIController.patchMVGObject(client, "clients", "clients_timestamp");
     }
 }

@@ -14,15 +14,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.auxilary.IO;
-import server.auxilary.RemoteComms;
-import server.exceptions.InvalidBusinessObjectException;
-import server.exceptions.InvalidQuoteException;
-import server.model.Counter;
-import server.model.Quote;
 import server.model.QuoteRep;
 import server.repositories.QuoteRepRepository;
 
-import java.rmi.Remote;
 import java.util.List;
 
 @RepositoryRestController
@@ -61,13 +55,13 @@ public class QuoteRepController
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling QuoteRep creation request.");
         //HttpHeaders headers = new HttpHeaders();
-        return APIController.putBusinessObject(quote_rep, "quote_representatives", "quotes_timestamp");
+        return APIController.putMVGObject(quote_rep, "quote_representatives", "quotes_timestamp");
     }
 
     @PostMapping("/quotes/representatives")
     public ResponseEntity<String> patchQuote(@RequestBody QuoteRep quote_rep)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling QuoteRep update request.");
-        return APIController.patchBusinessObject(quote_rep, "quote_representatives", "quotes_timestamp");
+        return APIController.patchMVGObject(quote_rep, "quote_representatives", "quotes_timestamp");
     }
 }

@@ -7,10 +7,10 @@ import server.auxilary.IO;
  */
 public class Quote extends MVGObject
 {
+    private String enquiry_id;
     private String client_id;
     private String contact_person_id;
     private String parent_id;
-    private String sitename;
     private String request;
     private double vat;
     private String account_name;
@@ -36,16 +36,6 @@ public class Quote extends MVGObject
     public void setContact_person_id(String contact_person_id)
     {
         this.contact_person_id = contact_person_id;
-    }
-
-    public String getSitename()
-    {
-        return sitename;
-    }
-
-    public void setSitename(String sitename)
-    {
-        this.sitename = sitename;
     }
 
     public String getRequest()
@@ -117,8 +107,6 @@ public class Quote extends MVGObject
         }*/
         if(getRequest()==null)
             return new String[]{"false", "invalid request value."};
-        if(getSitename()==null)
-            return new String[]{"false", "invalid sitename value."};
         if(getContact_person_id()==null)
             return new String[]{"false", "invalid contact_person_id value."};
         if(getCreator()==null)
@@ -143,14 +131,13 @@ public class Quote extends MVGObject
         {
             switch (var.toLowerCase())
             {
+                case "enquiry_id":
+                    enquiry_id = (String)val;
                 case "client_id":
                     client_id = (String)val;
                     break;
                 case "contact_person_id":
                     contact_person_id = (String)val;
-                    break;
-                case "sitename":
-                    sitename = String.valueOf(val);
                     break;
                 case "request":
                     request = String.valueOf(val);
@@ -185,12 +172,12 @@ public class Quote extends MVGObject
     {
         switch (var.toLowerCase())
         {
+            case "enquiry_id":
+                return enquiry_id;
             case "client_id":
                 return client_id;
             case "contact_person_id":
                 return contact_person_id;
-            case "sitename":
-                return sitename;
             case "request":
                 return request;
             case "status":

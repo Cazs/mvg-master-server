@@ -48,11 +48,11 @@ public class User extends MVGObject
         this.pwd = pwd;
     }
 
-    public int getAccessLevel() {
+    public int getAccess_level() {
         return access_level;
     }
 
-    public void setAccessLevel(int access_level)
+    public void setAccess_level(int access_level)
     {
         this.access_level = access_level;
     }
@@ -85,6 +85,11 @@ public class User extends MVGObject
     public void setLastname(String lastname)
     {
         this.lastname = lastname;
+    }
+
+    public String getName()
+    {
+        return getFirstname()+" "+getLastname();
     }
 
     public String getEmail()
@@ -158,7 +163,7 @@ public class User extends MVGObject
             return new String[]{"false", "invalid organisation_id value."};
         if(getGender()==null)
             return new String[]{"false", "invalid gender value."};
-        if(getAccessLevel()<0)
+        if(getAccess_level()<0)
             return new String[]{"false", "invalid access_level value."};
 
         return super.isValid();
@@ -191,7 +196,7 @@ public class User extends MVGObject
                     setOrganisation_id((String)val);
                     break;
                 case "access_level":
-                    setAccessLevel(Integer.parseInt((String)val));
+                    setAccess_level(Integer.parseInt((String)val));
                     break;
                 case "tel":
                     setTel((String)val);
