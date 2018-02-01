@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.auxilary.IO;
 import server.model.FileMetadata;
-import server.model.Job;
 import server.model.PurchaseOrder;
 import server.repositories.PurchaseOrderRepository;
 

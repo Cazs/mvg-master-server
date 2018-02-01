@@ -1,25 +1,31 @@
 package server.model;
 
 import server.auxilary.IO;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 /**
  * Created by ghost on 2017/02/03.
  */
-public class JobEmployee extends MVGObject
+public class TripUser extends MVGObject
 {
-    private String job_id;
+    private String trip_id;
     private String usr;
-    public static final String TAG = "JobEmployee";
+    public static final String TAG = "TripUser";
 
-    public String getJob_id()
+    private StringProperty trip_idProperty(){return new SimpleStringProperty(trip_id);}
+
+    public String getTrip_id()
     {
-        return job_id;
+        return trip_id;
     }
 
-    public void setJob_id(String job_id)
+    public void setTrip_id(String trip_id)
     {
-        this.job_id = job_id;
+        this.trip_id = trip_id;
     }
+
+    private StringProperty usrProperty(){return new SimpleStringProperty(usr);}
 
     public String getUsr()
     {
@@ -32,17 +38,6 @@ public class JobEmployee extends MVGObject
     }
 
     @Override
-    public String[] isValid()
-    {
-        if(getUsr()==null)
-            return new String[]{"false", "invalid usr value."};
-        if(getJob_id()==null)
-            return new String[]{"false", "invalid job_id value."};
-
-        return super.isValid();
-    }
-
-    @Override
     public void parse(String var, Object val)
     {
         super.parse(var, val);
@@ -50,8 +45,8 @@ public class JobEmployee extends MVGObject
         {
             switch (var.toLowerCase())
             {
-                case "job_id":
-                    job_id = String.valueOf(val);
+                case "trip_id":
+                    trip_id = String.valueOf(val);
                     break;
                 case "usr":
                     usr = String.valueOf(val);
@@ -71,8 +66,8 @@ public class JobEmployee extends MVGObject
     {
         switch (var.toLowerCase())
         {
-            case "job_id":
-                return job_id;
+            case "trip_id":
+                return trip_id;
             case "usr":
                 return usr;
         }
@@ -82,6 +77,6 @@ public class JobEmployee extends MVGObject
     @Override
     public String apiEndpoint()
     {
-        return "/jobs/employees";
+        return "/trips/users";
     }
 }
