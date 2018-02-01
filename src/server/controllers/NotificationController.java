@@ -15,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.auxilary.IO;
 import server.model.Notification;
-import server.model.Notification;
+import server.repositories.NotificationRepository;
 
 import java.util.List;
 
@@ -24,6 +24,8 @@ import java.util.List;
 public class NotificationController
 {
     private PagedResourcesAssembler<Notification> pagedAssembler;
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @Autowired
     public NotificationController(PagedResourcesAssembler<Notification> pagedAssembler)

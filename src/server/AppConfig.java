@@ -46,7 +46,9 @@ public class AppConfig  extends RepositoryRestConfigurerAdapter
         config.exposeIdsFor(Resource.class);
         config.exposeIdsFor(Type.class);
         config.exposeIdsFor(ResourceType.class);
+        config.exposeIdsFor(Client.class);
         config.exposeIdsFor(Quote.class);
+        config.exposeIdsFor(Notification.class);
     }
     /*@Bean
     public Mongo mongo() throws Exception
