@@ -6,13 +6,8 @@ package server.model;
  * and open the template in the editor.
  */
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import server.auxilary.IO;
-
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
 /**
  *
@@ -25,6 +20,7 @@ public class Enquiry extends MVGObject implements Serializable
     private String destination;
     private String trip_type;
     private String comments;
+    private String client_id;
     private long date_scheduled;
     public static final String TAG = "Enquiry";
 
@@ -88,6 +84,16 @@ public class Enquiry extends MVGObject implements Serializable
         this.date_scheduled = date_scheduled;
     }
 
+    public String getClient_id()
+    {
+        return client_id;
+    }
+
+    public void setClient_id(String client_id)
+    {
+        this.client_id = client_id;
+    }
+
     @Override
     public void parse(String var, Object val)
     {
@@ -112,6 +118,9 @@ public class Enquiry extends MVGObject implements Serializable
                     break;
                 case "comments":
                     setComments((String)val);
+                    break;
+                case "client_id":
+                    setClient_id((String)val);
                     break;
                 default:
                     IO.log(TAG, IO.TAG_WARN, String.format("unknown "+getClass().getName()+" attribute '%s'", var));
@@ -140,6 +149,8 @@ public class Enquiry extends MVGObject implements Serializable
                 return trip_type;
             case "comments":
                 return comments;
+            case "client_id":
+                return client_id;
             default:
                 IO.log(TAG, IO.TAG_WARN, String.format("unknown "+getClass().getName()+" attribute '%s'", var));
                 return null;
@@ -169,6 +180,7 @@ public class Enquiry extends MVGObject implements Serializable
         //return String.format("[id = %s, firstname = %s, lastname = %s]", get_id(), getFirstname(), getLastname());
         return "{"+(get_id()==null?"":"\"_id\":\""+get_id()+"\", ")+
                 "\"enquiry\":\""+getEnquiry()+"\""+
+                ",\"client_id\":\""+getClient_id()+"\""+
                 ",\"destination\":\""+getDestination()+"\""+
                 ",\"pickup_location\":\""+getPickup_location()+"\""+
                 ",\"trip_type\":\""+getTrip_type()+"\""+

@@ -35,10 +35,25 @@ public class EnquiryController
         this.pagedAssembler = pagedAssembler;
     }
 
-    @GetMapping(path="/enquiries/{id}", produces = "application/hal+json")
+    @GetMapping(path="/enquiry/{id}", produces = "application/hal+json")
     public ResponseEntity<Page<Enquiry>> getEnquiry(@PathVariable("id") String id, Pageable pageRequest, PersistentEntityResourceAssembler assembler)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Enquiry GET request id: "+ id);
+        List<Enquiry> contents = IO.getInstance().mongoOperations().find(new Query(Criteria.where("_id").is(id)), Enquiry.class, "enquiries");
+        return new ResponseEntity(pagedAssembler.toResource(new PageImpl(contents, pageRequest, contents.size()), (ResourceAssembler) assembler), HttpStatus.OK);
+    }
+
+    /**
+     * Method to get the Enquiries for a specific Client
+     * @param id Client ID
+     * @param pageRequest
+     * @param assembler
+     * @return Enquiries for a specific Client as a JSON object.
+     */
+    @GetMapping(path="/enquiries/{id}", produces = "application/hal+json")
+    public ResponseEntity<Page<Enquiry>> getEnquiriesForClient(@PathVariable("id") String id, Pageable pageRequest, PersistentEntityResourceAssembler assembler)
+    {
+        IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Enquiry GET request for client with id: "+ id);
         List<Enquiry> contents = IO.getInstance().mongoOperations().find(new Query(Criteria.where("_id").is(id)), Enquiry.class, "enquiries");
         return new ResponseEntity(pagedAssembler.toResource(new PageImpl(contents, pageRequest, contents.size()), (ResourceAssembler) assembler), HttpStatus.OK);
     }
