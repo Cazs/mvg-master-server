@@ -48,13 +48,13 @@ public class EnquiryController
      * @param id Client ID
      * @param pageRequest
      * @param assembler
-     * @return Enquiries for a specific Client as a JSON object.
+     * @return Enquiries for a specific Client as a JSON array object.
      */
     @GetMapping(path="/enquiries/{id}", produces = "application/hal+json")
     public ResponseEntity<Page<Enquiry>> getEnquiriesForClient(@PathVariable("id") String id, Pageable pageRequest, PersistentEntityResourceAssembler assembler)
     {
-        IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Enquiry GET request for client with id: "+ id);
-        List<Enquiry> contents = IO.getInstance().mongoOperations().find(new Query(Criteria.where("_id").is(id)), Enquiry.class, "enquiries");
+        IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Enquiries GET request for client with ID ["+id+"]");
+        List<Enquiry> contents = IO.getInstance().mongoOperations().find(new Query(Criteria.where("client_id").is(id)), Enquiry.class, "enquiries");
         return new ResponseEntity(pagedAssembler.toResource(new PageImpl(contents, pageRequest, contents.size()), (ResourceAssembler) assembler), HttpStatus.OK);
     }
 

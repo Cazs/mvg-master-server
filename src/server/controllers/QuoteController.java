@@ -33,11 +33,26 @@ public class QuoteController
         this.pagedAssembler = pagedAssembler;
     }
 
-    @GetMapping(path="/quotes/{id}", produces = "application/hal+json")
+    @GetMapping(path="/quote/{id}", produces = "application/hal+json")
     public ResponseEntity<Page<Quote>> getQuote(@PathVariable("id") String id, Pageable pageRequest, PersistentEntityResourceAssembler assembler)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Quote GET request id: "+ id);
         List<Quote> contents = IO.getInstance().mongoOperations().find(new Query(Criteria.where("_id").is(id)), Quote.class, "quotes");
+        return new ResponseEntity(pagedAssembler.toResource(new PageImpl(contents, pageRequest, contents.size()), (ResourceAssembler) assembler), HttpStatus.OK);
+    }
+
+    /**
+     * Method to get the Quotes for a specific Client
+     * @param id Client ID
+     * @param pageRequest
+     * @param assembler
+     * @return Quotes for a specific Client as a JSON array object.
+     */
+    @GetMapping(path="/quotes/{id}", produces = "application/hal+json")
+    public ResponseEntity<Page<Quote>> getQuotesForClient(@PathVariable("id") String id, Pageable pageRequest, PersistentEntityResourceAssembler assembler)
+    {
+        IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Quotes GET request for client with ID: "+ id);
+        List<Quote> contents = IO.getInstance().mongoOperations().find(new Query(Criteria.where("client_id").is(id)), Quote.class, "quotes");
         return new ResponseEntity(pagedAssembler.toResource(new PageImpl(contents, pageRequest, contents.size()), (ResourceAssembler) assembler), HttpStatus.OK);
     }
 

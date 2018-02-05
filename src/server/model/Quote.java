@@ -18,6 +18,16 @@ public class Quote extends MVGObject
     private int status;
     public static final String TAG = "Quote";
 
+    public String getEnquiry_id()
+    {
+        return enquiry_id;
+    }
+
+    public void setEnquiry_id(String enquiry_id)
+    {
+        this.enquiry_id = enquiry_id;
+    }
+
     public String getClient_id()
     {
         return client_id;
