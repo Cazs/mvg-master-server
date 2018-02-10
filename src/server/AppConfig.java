@@ -33,9 +33,7 @@ public class AppConfig  extends RepositoryRestConfigurerAdapter
     @Bean
     public EmbeddedServletContainerCustomizer containerCustomizer()
     {
-        return (container -> {
-            container.setPort(8083);
-        });
+        return (container -> container.setPort(8083));
     }
 
     @Override
@@ -50,7 +48,7 @@ public class AppConfig  extends RepositoryRestConfigurerAdapter
         config.exposeIdsFor(Quote.class);
         config.exposeIdsFor(Notification.class);
         config.exposeIdsFor(Trip.class);
-        config.exposeIdsFor(TripUser.class);
+        config.exposeIdsFor(TripDriver.class);
         config.exposeIdsFor(Invoice.class);
     }
     /*@Bean

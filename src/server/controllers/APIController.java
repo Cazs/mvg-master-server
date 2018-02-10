@@ -147,8 +147,8 @@ public class APIController
                             auth_users.toArray(auth_users_arr);
 
                             //create approval link
-                            message += "<br/><h3 style=\"text-align:center;\">" +
-                                    "Click <a href=\""
+                            message += "<br/><h3 style=\"text-align:center;\">"
+                                    +"Click <a href=\""
                                     +RemoteComms.host+endpoint+"/approve/"+_id+"/"+vericode.getCode()
                                     +"\">here</a> to approve this "+model.getSimpleName()+".</h3>";
                             //Send email with approval link

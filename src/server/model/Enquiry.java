@@ -105,7 +105,7 @@ public class Enquiry extends MVGObject implements Serializable
                     setEnquiry((String)val);
                     break;
                 case "date_scheduled":
-                    setDate_scheduled(Long.parseLong((String)val));
+                    setDate_scheduled(Long.parseLong(String.valueOf(val)));
                     break;
                 case "pickup_location":
                     setPickup_location((String)val);

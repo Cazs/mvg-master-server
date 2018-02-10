@@ -7,11 +7,11 @@ import javafx.beans.property.StringProperty;
 /**
  * Created by ghost on 2017/02/03.
  */
-public class TripUser extends MVGObject
+public class TripDriver extends MVGObject
 {
     private String trip_id;
     private String usr;
-    public static final String TAG = "TripUser";
+    public static final String TAG = "TripDriver";
 
     private StringProperty trip_idProperty(){return new SimpleStringProperty(trip_id);}
 

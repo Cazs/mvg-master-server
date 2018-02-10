@@ -13,13 +13,25 @@ import server.auxilary.IO;
  */
 public class Invoice extends MVGObject
 {
-    private String job_id;
+    private String trip_id;
+    private String client_id;
     private String quote_id;
     private double receivable;
+    private int status;
 
     public double getReceivable()
     {
         return receivable;
+    }
+
+    public String getClient_id()
+    {
+        return client_id;
+    }
+
+    public void setClient_id(String client_id)
+    {
+        this.client_id = client_id;
     }
 
     public void setReceivable(double receivable)
@@ -27,14 +39,14 @@ public class Invoice extends MVGObject
         this.receivable = receivable;
     }
 
-    public String getJob_id()
+    public String getTrip_id()
     {
-        return job_id;
+        return trip_id;
     }
 
-    public void setJob_id(String job_id)
+    public void setTrip_id(String trip_id)
     {
-        this.job_id = job_id;
+        this.trip_id = trip_id;
     }
 
     public String getQuote_id()
@@ -47,11 +59,23 @@ public class Invoice extends MVGObject
         this.quote_id = quote_id;
     }
 
+    public int getStatus()
+    {
+        return status;
+    }
+
+    public void setStatus(int status)
+    {
+        this.status = status;
+    }
+
     @Override
     public String[] isValid()
     {
-        if(getJob_id()==null)
-            return new String[]{"false", "invalid job_id value."};
+        if(getTrip_id()==null)
+            return new String[]{"false", "invalid trip_id value."};
+        if(getClient_id()==null)
+            return new String[]{"false", "invalid client_id value."};
         if(getReceivable()<0)
             return new String[]{"false", "invalid receivable value."};
 
@@ -66,11 +90,17 @@ public class Invoice extends MVGObject
         {
             switch (var.toLowerCase())
             {
-                case "job_id":
-                    setJob_id(String.valueOf(val));
+                case "trip_id":
+                    setTrip_id(String.valueOf(val));
                     break;
                 case "quote_id":
                     setQuote_id(String.valueOf(val));
+                    break;
+                case "status":
+                    status = Integer.parseInt(String.valueOf(val));
+                    break;
+                case "client_id":
+                    setClient_id(String.valueOf(val));
                     break;
                 case "creator":
                     setCreator(String.valueOf(val));
@@ -96,10 +126,14 @@ public class Invoice extends MVGObject
         {
             switch (var.toLowerCase())
             {
-                case "job_id":
-                    return getJob_id();
+                case "trip_id":
+                    return getTrip_id();
+                case "client_id":
+                    return getClient_id();
                 case "quote_id":
                     return getQuote_id();
+                case "status":
+                    return getStatus();
                 case "receivable":
                     return getReceivable();
                 default:

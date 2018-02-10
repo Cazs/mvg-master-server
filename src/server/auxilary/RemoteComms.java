@@ -40,7 +40,7 @@ public class RemoteComms
     public static int DB_PORT = 27017;
     public static String DB_NAME = "mvg";
     public static int TTL = 60*60*2;//2 hours in sec
-    public static String SYSTEM_EMAIL = "system@travelmvg.co.za";
+    public static String SYSTEM_EMAIL = "no-reply@travelmvg.co.za";
 
     public static void setHost(String h)
     {
@@ -290,7 +290,7 @@ public class RemoteComms
                                 .put(Emailv31.Message.HTMLPART, message)
                                 .put(Emailv31.Message.ATTACHMENTS, files)));
         response = client.post(request);
-        IO.log(RemoteComms.class.getName(), IO.TAG_ERROR, response.getStatus()+": " +response.getData());
+        IO.log(RemoteComms.class.getName(), IO.TAG_INFO, response.getStatus()+": " +response.getData());
         return response;
     }
 

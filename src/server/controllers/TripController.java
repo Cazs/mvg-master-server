@@ -24,7 +24,6 @@ import java.rmi.Remote;
 import java.util.List;
 
 @RepositoryRestController
-//@RequestMapping("/trips")
 public class TripController
 {
     private PagedResourcesAssembler<Trip> pagedAssembler;
@@ -37,11 +36,26 @@ public class TripController
         this.pagedAssembler = pagedAssembler;
     }
 
-    @GetMapping(path="/trips/{id}", produces = "application/hal+json")
+    @GetMapping(path="/trip/{id}", produces = "application/hal+json")
     public ResponseEntity<Page<Trip>> getTrip(@PathVariable("id") String id, Pageable pageRequest, PersistentEntityResourceAssembler assembler)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Trip GET request id: "+ id);
         List<Trip> contents = IO.getInstance().mongoOperations().find(new Query(Criteria.where("_id").is(id)), Trip.class, "trips");
+        return new ResponseEntity(pagedAssembler.toResource(new PageImpl(contents, pageRequest, contents.size()), (ResourceAssembler) assembler), HttpStatus.OK);
+    }
+
+    /**
+     * Method to get Trips for a specific client/organisation.
+     * @param id client/organisation identifier.
+     * @param pageRequest
+     * @param assembler
+     * @return JSON array of Trips for that specific client/organisation.
+     */
+    @GetMapping(path="/trips/{id}", produces = "application/hal+json")
+    public ResponseEntity<Page<Trip>> getTripsForClient(@PathVariable("id") String id, Pageable pageRequest, PersistentEntityResourceAssembler assembler)
+    {
+        IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Trip GET request for client with ID: "+ id);
+        List<Trip> contents = IO.getInstance().mongoOperations().find(new Query(Criteria.where("client_id").is(id)), Trip.class, "trips");
         return new ResponseEntity(pagedAssembler.toResource(new PageImpl(contents, pageRequest, contents.size()), (ResourceAssembler) assembler), HttpStatus.OK);
     }
 

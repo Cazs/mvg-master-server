@@ -115,6 +115,11 @@ public class Quote extends MVGObject
             IO.log(getClass().getName(), IO.TAG_ERROR, "invalid parent_id value.");
             return false;
         }*/
+        /*if(getEnquiry_id()==null)
+        {
+            IO.log(getClass().getName(), IO.TAG_ERROR, "invalid enquiry_id value.");
+            return false;
+        }*/
         if(getRequest()==null)
             return new String[]{"false", "invalid request value."};
         if(getContact_person_id()==null)

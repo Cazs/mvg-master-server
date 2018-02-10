@@ -5,13 +5,7 @@
  */
 package server.model;
 
-import server.auxilary.Globals;
 import server.auxilary.IO;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-
-import java.util.ArrayList;
-
 /**
  *
  * @author ghost
@@ -20,6 +14,7 @@ public class Trip extends MVGObject
 {
     private long date_assigned;
     private String quote_id;
+    private String client_id;
     private int status;
 
     //Getters and setters
@@ -52,6 +47,47 @@ public class Trip extends MVGObject
     public void setQuote_id(String quote_id)
     {
         this.quote_id = quote_id;
+    }
+
+    public String getClient_id()
+    {
+        return client_id;
+    }
+
+    public void setClient_id(String client_id)
+    {
+        this.client_id = client_id;
+    }
+
+    @Override
+    public String[] isValid()
+    {
+        if(getClient_id()==null)
+            return new String[]{"false", "invalid client_id value."};
+        /*if(getParent_id()==null)
+        {
+            IO.log(getClass().getName(), IO.TAG_ERROR, "invalid parent_id value.");
+            return false;
+        }*/
+        /*if(getEnquiry_id()==null)
+        {
+            IO.log(getClass().getName(), IO.TAG_ERROR, "invalid enquiry_id value.");
+            return false;
+        }*/
+        if(getClient_id()==null)
+            return new String[]{"false", "invalid client_id value."};
+        if(getQuote_id()==null)
+            return new String[]{"false", "invalid quote_id value."};
+        if(getCreator()==null)
+            return new String[]{"false", "invalid creator value."};
+        if(getDate_assigned()<0)
+            return new String[]{"false", "invalid date_assigned value."};
+        if(getStatus()<0)
+            return new String[]{"false", "invalid status value."};
+        if(getDate_logged()<0)
+            return new String[]{"false", "invalid date_logged value."};
+
+        return super.isValid();
     }
 
     /**
