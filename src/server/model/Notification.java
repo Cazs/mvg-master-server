@@ -1,5 +1,6 @@
 package server.model;
 
+import server.auxilary.AccessLevels;
 import server.auxilary.IO;
 
 import java.io.Serializable;
@@ -7,16 +8,20 @@ import java.io.Serializable;
 /**
  * Created by ghost on 2018/01/29.
  */
-public class Notification extends MVGObject implements Serializable
+public class Notification extends MVGObject
 {
     private String subject;
     private String message;
     private String client_id;
-    private int status;
-    public static final String TAG = "FileMetadata";
+    public static final String TAG = "Metafile";
 
     public Notification()
     {
+    }
+
+    public Notification(String _id)
+    {
+        super(_id);
     }
 
     public Notification(String subject, String message, String client_id)
@@ -25,6 +30,18 @@ public class Notification extends MVGObject implements Serializable
         setMessage(message);
         setClient_id(client_id);
         setStatus(0);
+    }
+
+    @Override
+    public AccessLevels getReadMinRequiredAccessLevel()
+    {
+        return AccessLevels.STANDARD;
+    }
+
+    @Override
+    public AccessLevels getWriteMinRequiredAccessLevel()
+    {
+        return AccessLevels.ADMIN;
     }
 
     public String getSubject()
@@ -57,16 +74,6 @@ public class Notification extends MVGObject implements Serializable
         this.client_id = client_id;
     }
 
-    public int getStatus()
-    {
-        return status;
-    }
-
-    public void setStatus(int status)
-    {
-        this.status = status;
-    }
-
     @Override
     public void parse(String var, Object val)
     {
@@ -81,9 +88,6 @@ public class Notification extends MVGObject implements Serializable
                 break;
             case "client_id":
                 client_id=(String)val;
-                break;
-            case "status":
-                status=Integer.parseInt((String)val);
                 break;
             default:
                 IO.log(TAG, IO.TAG_ERROR, "unknown "+TAG+" attribute '" + var + "'");
@@ -105,8 +109,6 @@ public class Notification extends MVGObject implements Serializable
                     return message;
                 case "client_id":
                     return client_id;
-                case "status":
-                    return status;
                 default:
                     return null;
             }

@@ -27,6 +27,11 @@ targetCompatibility = 1.8
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-data-rest")
     compile("org.springframework.boot:spring-boot-starter-data-mongodb")
+    compile group: 'org.mongodb', name: 'mongo-java-driver', version: '3.6.2'
     testCompile("org.springframework.boot:spring-boot-starter-test")
 }
 
+bootRepackage {
+    enabled = false
+    mainClass = "server.Server"
+}

@@ -5,6 +5,7 @@
  */
 package server.model;
 
+import server.auxilary.AccessLevels;
 import server.auxilary.IO;
 
 /**
@@ -16,12 +17,31 @@ public class Invoice extends MVGObject
     private String trip_id;
     private String client_id;
     private String quote_id;
-    private double receivable;
-    private int status;
+    private double cash_received;
 
-    public double getReceivable()
+    public Invoice()
+    {}
+
+    public Invoice(String _id)
     {
-        return receivable;
+        super(_id);
+    }
+
+    @Override
+    public AccessLevels getReadMinRequiredAccessLevel()
+    {
+        return AccessLevels.STANDARD;
+    }
+
+    @Override
+    public AccessLevels getWriteMinRequiredAccessLevel()
+    {
+        return AccessLevels.ADMIN;
+    }
+
+    public double getCash_received()
+    {
+        return cash_received;
     }
 
     public String getClient_id()
@@ -34,9 +54,9 @@ public class Invoice extends MVGObject
         this.client_id = client_id;
     }
 
-    public void setReceivable(double receivable)
+    public void setCash_received(double cash_received)
     {
-        this.receivable = receivable;
+        this.cash_received = cash_received;
     }
 
     public String getTrip_id()
@@ -59,16 +79,6 @@ public class Invoice extends MVGObject
         this.quote_id = quote_id;
     }
 
-    public int getStatus()
-    {
-        return status;
-    }
-
-    public void setStatus(int status)
-    {
-        this.status = status;
-    }
-
     @Override
     public String[] isValid()
     {
@@ -76,8 +86,8 @@ public class Invoice extends MVGObject
             return new String[]{"false", "invalid trip_id value."};
         if(getClient_id()==null)
             return new String[]{"false", "invalid client_id value."};
-        if(getReceivable()<0)
-            return new String[]{"false", "invalid receivable value."};
+        if(getCash_received()<0)
+            return new String[]{"false", "invalid cash_received value."};
 
         return super.isValid();
     }
@@ -96,17 +106,14 @@ public class Invoice extends MVGObject
                 case "quote_id":
                     setQuote_id(String.valueOf(val));
                     break;
-                case "status":
-                    status = Integer.parseInt(String.valueOf(val));
-                    break;
                 case "client_id":
                     setClient_id(String.valueOf(val));
                     break;
                 case "creator":
                     setCreator(String.valueOf(val));
                     break;
-                case "receivable":
-                    setReceivable(Double.valueOf(String.valueOf(val)));
+                case "cash_received":
+                    setCash_received(Double.valueOf(String.valueOf(val)));
                     break;
                 default:
                     IO.log(getClass().getName(), IO.TAG_ERROR, "unknown "+getClass().getName()+" attribute '" + var + "'.");
@@ -134,8 +141,8 @@ public class Invoice extends MVGObject
                     return getQuote_id();
                 case "status":
                     return getStatus();
-                case "receivable":
-                    return getReceivable();
+                case "cash_received":
+                    return getCash_received();
                 default:
                     IO.log(getClass().getName(), IO.TAG_ERROR, "unknown " + getClass()
                             .getName() + " attribute '" + var + "'.");

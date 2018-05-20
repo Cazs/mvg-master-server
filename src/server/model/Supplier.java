@@ -1,5 +1,6 @@
 package server.model;
 
+import server.auxilary.AccessLevels;
 import server.auxilary.IO;
 
 /**
@@ -14,12 +15,33 @@ public class Supplier extends MVGObject
     private String fax;
     private String contact_email;
     private String speciality;
-    private boolean active;
     private long date_partnered;
     private String website;
     private String registration_number;
     private String vat_number;
     private String account_name;
+    public static final int STATUS_INACTIVE = 0;
+    public static final int STATUS_ACTIVE = 1;
+
+    public Supplier()
+    {}
+
+    public Supplier(String _id)
+    {
+        super(_id);
+    }
+
+    @Override
+    public AccessLevels getReadMinRequiredAccessLevel()
+    {
+        return AccessLevels.STANDARD;
+    }
+
+    @Override
+    public AccessLevels getWriteMinRequiredAccessLevel()
+    {
+        return AccessLevels.ADMIN;
+    }
 
     public String getSupplier_name()
     {
@@ -83,12 +105,12 @@ public class Supplier extends MVGObject
 
     public boolean isActive()
     {
-        return active;
+        return getStatus()==STATUS_ACTIVE;
     }
 
     public void setActive(boolean active)
     {
-        this.active = active;
+        setStatus(active ? STATUS_ACTIVE : STATUS_INACTIVE);
     }
 
     public long getDate_partnered()

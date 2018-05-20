@@ -7,4 +7,4 @@ applications:
   domain: omegafs.co.za
   path: build/libs/omega-bms-rest-server-0.1.0.jar
   server:
-    port: 8083
+    port: 8080

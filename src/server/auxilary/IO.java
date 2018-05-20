@@ -17,6 +17,11 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.ZoneId;
+import java.util.AbstractMap;
 import java.util.Arrays;
 
 /**
@@ -24,7 +29,6 @@ import java.util.Arrays;
  */
 public class IO<T extends MVGObject>
 {
-
     public static final String TAG_VERBOSE = "verbose";
     public static final String TAG_INFO = "info";
     public static final String TAG_WARN = "warning";
@@ -57,7 +61,46 @@ public class IO<T extends MVGObject>
         return str;
     }
 
-    public byte[] encrypt(String digest, String message) throws Exception
+    public static AbstractMap.SimpleEntry<Integer, LocalDateTime> isEpochSecondOrMilli(long epoch_date)
+    {
+        switch (String.valueOf(epoch_date).length())
+        {
+            case 10: // is using epoch seconds
+                return new AbstractMap.SimpleEntry<>(0, LocalDateTime.ofInstant(Instant.ofEpochSecond(epoch_date), ZoneId.systemDefault()));
+            case 13: // is using epoch millis
+                return new AbstractMap.SimpleEntry<>(1, LocalDateTime.ofInstant(Instant.ofEpochMilli(epoch_date), ZoneId.systemDefault()));
+            default:
+                IO.log(IO.class.getName(), IO.TAG_ERROR, "unknown date format ["+epoch_date+"] - should be epoch millis or epoch seconds.");
+                return new AbstractMap.SimpleEntry<>(3, LocalDateTime.of(1970, Month.JANUARY.getValue(), 1, 0, 0));
+        }
+    }
+
+    public static String getYyyyMMddFormmattedDate(LocalDateTime date)
+    {
+        return date.getYear() +
+                "-" + (date.getMonth().getValue() >= 10 ? date.getMonth().getValue() : "0" + String.valueOf((date.getMonth().getValue()))) +
+                "-" + (date.getDayOfMonth() >= 10 ? date.getDayOfMonth() : "0" + String.valueOf(date.getDayOfMonth()));
+    }
+
+    public static String getEncryptedHexString(String message) throws Exception
+    {
+        StringBuilder str = new StringBuilder();
+        for(byte b: hash(message))
+            str.append(Integer.toHexString(0xFF & b));
+        return str.toString();
+    }
+
+    //TODO: use blowfish/bcrypt
+    public static byte[] hash(String plaintext) throws Exception
+    {
+        MessageDigest m = MessageDigest.getInstance("MD5");
+        m.reset();
+        m.update(plaintext.getBytes());
+        return m.digest();
+    }
+
+    //TODO: use blowfish/bcrypt
+    public static byte[] encrypt(String digest, String message) throws Exception
     {
         final MessageDigest md = MessageDigest.getInstance("md5");
         final byte[] digestOfPassword = md.digest(digest.getBytes("utf-8"));
@@ -77,7 +120,8 @@ public class IO<T extends MVGObject>
         return cipherText;
     }
 
-    public String decrypt(String digest, byte[] message) throws Exception
+    //TODO: use blowfish/bcrypt
+    public static String decrypt(String digest, byte[] message) throws Exception
     {
         final MessageDigest md = MessageDigest.getInstance("md5");
         final byte[] digestOfPassword = md.digest(digest.getBytes("utf-8"));
@@ -130,6 +174,76 @@ public class IO<T extends MVGObject>
         return i;
     }
 
+    public static void writeAttributeToConfig(String key, String value) throws IOException
+    {
+        //TO_Consider: add meta data for [key,value] to meta records.
+        File f = new File("config.cfg");
+        StringBuilder result = new StringBuilder();
+        boolean rec_found=false;
+        if(f.exists())
+        {
+            String s = "";
+            BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
+            int line_read_count=0;
+            while ((s = in.readLine())!=null)
+            {
+                if(s.contains("="))
+                {
+                    String k = s.split("=")[0];
+                    String val = s.split("=")[1];
+                    //If the record exists, change it
+                    if(k.equals(key))
+                    {
+                        val = value;//Update record value
+                        rec_found=true;
+                    }
+                    result.append(k+"="+val+"\n");//Append existing record.
+                    line_read_count++;
+                } else IO.log(TAG, IO.TAG_ERROR, "Config file may be corrupted.");
+            }
+            if(!rec_found)//File exists but no key was found - write new line.
+                result.append(key+"="+value+"\n");
+            /*if(in!=null)
+                in.close();*/
+        } else result.append(key+"="+value+"\n");//File DNE - write new line.
+
+        IO.log(TAG, IO.TAG_INFO, "writing attribute to config: " + key + "=" + value);
+
+        /*if(!rec_found)//File exists but record doesn't exist - create new record
+            result.append(key+"="+value+"\n");*/
+
+        //Write to disk.
+        PrintWriter out = new PrintWriter(f);
+        out.print(result);
+        out.flush();
+        out.close();
+    }
+
+    public static String readAttributeFromConfig(String key) throws IOException
+    {
+        File f = new File("config.cfg");
+        if(f.exists())
+        {
+            String s = "";
+            BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
+            while ((s = in.readLine())!=null)
+            {
+                if(s.contains("="))
+                {
+                    String var = s.split("=")[0];
+                    String val = s.split("=")[1];
+                    if(var.equals(key))
+                    {
+                        /*if(in!=null)
+                            in.close();*/
+                        return val;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     public static String readStream(InputStream stream) throws IOException
     {
         //Get message from input stream
@@ -145,7 +259,7 @@ public class IO<T extends MVGObject>
             in.close();
 
             return msg.toString();
-        }else IO.logAndAlert(TAG, "could not read error stream from server response.", IO.TAG_ERROR);
+        }else IO.log(TAG, IO.TAG_ERROR, "could not read error stream from server response.");
         return null;
     }
 
@@ -173,53 +287,5 @@ public class IO<T extends MVGObject>
                 System.out.println(String.format("%s> %s: %s", src, tag, msg));
                 break;
         }
-    }
-
-    public static void showMessage(String title, String msg, String type)
-    {
-        Platform.runLater(() ->
-        {
-            Stage stage = new Stage();
-            stage.setTitle(title);
-            stage.setResizable(false);
-            stage.setAlwaysOnTop(true);
-            stage.centerOnScreen();
-
-            Label label = new Label(msg);
-            Button btn = new Button("Confirm");
-
-            BorderPane borderPane= new BorderPane();
-            borderPane.setTop(label);
-            borderPane.setCenter(btn);
-            //VBox vBox = new VBox(label, btn);
-            stage.setScene(new Scene(borderPane));
-
-            stage.show();
-
-            btn.setOnAction(event -> stage.close());
-
-            /*switch (type.toLowerCase())
-            {
-                case TAG_INFO:
-                    JOptionPane.showMessageDialog(null, msg, title, JOptionPane.INFORMATION_MESSAGE);
-                    break;
-                case TAG_WARN:
-                    JOptionPane.showMessageDialog(null, msg, title, JOptionPane.WARNING_MESSAGE);
-                    break;
-                case TAG_ERROR:
-                    JOptionPane.showMessageDialog(null, msg, title, JOptionPane.ERROR_MESSAGE);
-                    break;
-                default:
-                    System.err.println("IO> unknown message type '" + type + "'");
-                    JOptionPane.showMessageDialog(null, msg, title, JOptionPane.PLAIN_MESSAGE);
-                    break;
-            }*/
-        });
-    }
-
-    public static void logAndAlert(String title, String msg, String type)
-    {
-        log(title, type, msg);
-        showMessage(title, msg, type);
     }
 }

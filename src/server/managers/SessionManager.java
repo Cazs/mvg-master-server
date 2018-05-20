@@ -34,7 +34,7 @@ public class SessionManager
     {
         if(session==null)
         {
-            IO.logAndAlert(getClass().getName(), "Invalid session.", IO.TAG_ERROR);
+            IO.log(getClass().getName(), IO.TAG_ERROR, "Invalid session.");
             return;
         }
         //if session exists in memory, update creation date, id & ttl

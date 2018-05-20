@@ -5,7 +5,12 @@
  */
 package server.model;
 
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import server.auxilary.AccessLevels;
 import server.auxilary.IO;
+
+import java.util.List;
 
 /**
  *
@@ -23,20 +28,42 @@ public class User extends MVGObject
     private String tel;
     private String cell;
     private int access_level;
-    private boolean active;
+    public static final int STATUS_INACTIVE = 0;
+    public static final int STATUS_ACTIVE = 1;
     public static final String TAG = "User";
-    public static int ACCESS_LEVEL_NONE = 0;
-    public static int ACCESS_LEVEL_NORMAL = 1;
-    public static int ACCESS_LEVEL_ADMIN = 2;
-    public static int ACCESS_LEVEL_SUPER = 3;
+
+    public User()
+    {}
+
+    public User(String _id)
+    {
+        super(_id);
+    }
+
+    @Override
+    public AccessLevels getReadMinRequiredAccessLevel()
+    {
+        return AccessLevels.STANDARD;
+    }
+
+    @Override
+    public AccessLevels getWriteMinRequiredAccessLevel()
+    {
+        //if User to be created has access rights > standard then creator must have superuser access rights
+        if(getAccess_level()>AccessLevels.STANDARD.getLevel())
+            return AccessLevels.SUPERUSER;
+        else return AccessLevels.STANDARD;
+    }
 
     public String getUsr()
     {
         return usr;
     }
 
-    public void setUsr(String usr) {
+    public User setUsr(String usr)
+    {
         this.usr = usr;
+        return this;
     }
 
     public String getPwd()
@@ -59,12 +86,12 @@ public class User extends MVGObject
 
     public boolean isActive()
     {
-        return active;
+        return getStatus()==STATUS_ACTIVE;
     }
 
     public void setActive(boolean active)
     {
-        this.active = active;
+        setStatus(active ? STATUS_ACTIVE : STATUS_INACTIVE);
     }
 
     public String getFirstname()
@@ -142,6 +169,26 @@ public class User extends MVGObject
         this.gender = gender;
     }
 
+    public User getUser()
+    {
+        //get User from this Session object
+        List<User> users = IO.getInstance().mongoOperations().find(new Query(Criteria.where("usr").is(getUsr())), User.class, "users");
+        if(users==null)
+        {
+            IO.log(getClass().getName(), IO.TAG_ERROR, "getUser()> could not find a user associated with the username ["+getUsr()+"]");
+            return null;
+        }
+        if(users.size()!=1)//should never happen
+        {
+            IO.log(getClass().getName(), IO.TAG_ERROR, "getUser()> could not find a valid user associated with username ["+getUsr()+"]");
+            return null;
+        }
+
+        return users.get(0);
+    }
+
+    public String getInitials(){return new String(firstname.substring(0,1) + lastname.substring(0,1));}
+
     @Override
     public String[] isValid()
     {
@@ -155,12 +202,12 @@ public class User extends MVGObject
             return new String[]{"false", "invalid lastname value."};
         if(getCell()==null)
             return new String[]{"false", "invalid cell value."};
-        if(getTel()==null)
-            return new String[]{"false", "invalid tel value."};
+        // if(getTel()==null)
+        //    return new String[]{"false", "invalid tel value."};
         if(getEmail()==null)
             return new String[]{"false", "invalid email value."};
-        if(getOrganisation_id()==null)
-            return new String[]{"false", "invalid organisation_id value."};
+        // if(getOrganisation_id()==null)
+        //    return new String[]{"false", "invalid organisation_id value."};
         if(getGender()==null)
             return new String[]{"false", "invalid gender value."};
         if(getAccess_level()<0)
@@ -244,7 +291,7 @@ public class User extends MVGObject
                 case "cell":
                     return cell;
                 case "active":
-                    return active;
+                    return isActive();
                 default:
                     IO.log(TAG, IO.TAG_WARN, String.format("unknown "+getClass().getName()+" attribute '%s'", var));
                     return null;
@@ -255,25 +302,8 @@ public class User extends MVGObject
     @Override
     public String toString()
     {
-        //return String.format("[id = %s, firstname = %s, lastname = %s]", get_id(), getFirstname(), getLastname());
-        return "{"+(get_id()==null?"":"\"_id\":\""+get_id()+"\", ")+
-                "\"firstname\":\""+firstname+"\""+
-                "\"lastname\":\""+lastname+"\""+
-                ",\"usr\":\""+usr+"\""+
-                ",\"pwd\":\""+pwd+"\""+
-                ",\"access_level\":\""+access_level+"\""+
-                ",\"gender\":\""+gender+"\""+
-                ",\"email\":\""+email+"\""+
-                ",\"organisation_id\":\""+organisation_id+"\""+
-                ",\"tel\":\""+tel+"\""+
-                ",\"cell\":\""+cell+"\""+
-                ",\"active\":\""+active+"\""+
-                ",\"creator\":\""+getCreator()+"\""+
-                ",\"date_logged\":\""+getDate_logged()+"\""+
-                "\"other\":\""+getOther()+"\"}";
+        return super.toString() + " = "  + getName();
     }
-
-    public String getInitials(){return new String(firstname.substring(0,1) + lastname.substring(0,1));}
 
     @Override
     public String apiEndpoint()

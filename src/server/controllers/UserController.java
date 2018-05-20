@@ -14,14 +14,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.auxilary.AccessLevels;
+import server.auxilary.BCrypt;
 import server.auxilary.IO;
+import server.model.MVGObject;
 import server.model.User;
 
 import java.util.List;
 
 @RepositoryRestController
-@RequestMapping("/users")
-public class UserController
+public class UserController extends APIController
 {
     private PagedResourcesAssembler<User> pagedAssembler;
 
@@ -31,38 +32,36 @@ public class UserController
         this.pagedAssembler = pagedAssembler;
     }
 
-    @GetMapping(path="/{id}", produces = "application/hal+json")
-    public ResponseEntity<Page<User>> getUserById(@PathVariable("id") String id, Pageable pageRequest, PersistentEntityResourceAssembler assembler)
+    @GetMapping(path="/user/{id}", produces = "application/hal+json")
+    public ResponseEntity<Page<? extends MVGObject>> getUserById(@PathVariable("id") String id, @RequestHeader String session_id, Pageable pageRequest, PersistentEntityResourceAssembler assembler)
     {
-        IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling GET request for User: "+ id);
-        List<User> contents = IO.getInstance().mongoOperations().find(new Query(Criteria.where("_id").is(id)), User.class, "users");
-        if(contents!=null)//if not found by id, try by usr
-        {
-            if(contents.isEmpty())
-            {
-                IO.log(getClass().getName(), IO.TAG_WARN, "no User object matching _id found, trying usr..");
-                contents = IO.getInstance().mongoOperations()
-                        .find(new Query(Criteria.where("usr").is(id)), User.class, "users");
-            } else  IO.log(getClass().getName(), IO.TAG_INFO, "found User object.");
-        }
-        return new ResponseEntity(pagedAssembler.toResource(new PageImpl(contents, pageRequest, contents.size()), (ResourceAssembler) assembler), HttpStatus.OK);
+        return get(new User(id), "_id", session_id, "users", pagedAssembler, assembler, pageRequest);
     }
 
-    @GetMapping
-    public ResponseEntity<Page<User>> getAllUsers(Pageable pageRequest, PersistentEntityResourceAssembler assembler)
+    @GetMapping(path="/username/{usr}", produces = "application/hal+json")
+    public ResponseEntity<Page<? extends MVGObject>> getUserByUsername(@PathVariable("usr") String usr, @RequestHeader String session_id, Pageable pageRequest, PersistentEntityResourceAssembler assembler)
     {
-        IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling User get request {all}");
-        List<User> contents =  IO.getInstance().mongoOperations().findAll(User.class, "users");
-        return new ResponseEntity(pagedAssembler.toResource(new PageImpl(contents, pageRequest, contents.size()), (ResourceAssembler) assembler), HttpStatus.OK);
+        return get(new User().setUsr(usr), "usr", session_id, "users", pagedAssembler, assembler, pageRequest);
     }
 
-    @PutMapping
-    public ResponseEntity<String> addUser(@RequestBody User user)
+    @GetMapping(path = "/users")
+    public ResponseEntity<Page<? extends MVGObject>> getAllUsers(Pageable pageRequest, @RequestHeader String session_id, PersistentEntityResourceAssembler assembler)
+    {
+        return getAll(new User(), session_id, "users", pagedAssembler, assembler, pageRequest);
+    }
+
+    @PutMapping("/user")
+    public ResponseEntity<String> addUser(@RequestBody User user, @RequestHeader String session_id)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling User creation request.");
         //TODO: check access_level
         if(user!=null)
         {
+            // hash user password
+            String hashed_pwd = BCrypt.hashpw(user.getPwd(), BCrypt.gensalt(12));
+            IO.log(getClass().getName(), IO.TAG_INFO, "hashed pwd ["+hashed_pwd+"]");
+            user.setPwd(hashed_pwd);
+
             //only superusers can create accounts with access_level >= ADMIN
             if(user.getAccess_level()>= AccessLevels.ADMIN.getLevel())//if account to be created has access rights >= ADMIN
             {
@@ -72,14 +71,14 @@ public class UserController
                 {
                     //get user that's attempting to create the new superuser object
                     List<User> user_creator = IO.getInstance().mongoOperations().find(new
-                            Query(Criteria.where("usr").is(user.getCreator())), User.class, "users");
+                                                                                                      Query(Criteria.where("usr").is(user.getCreator())), User.class, "users");
                     if(!user_creator.isEmpty())
                     {
                         //found user, check if they're authorized to create superusers
-                        if(user_creator.get(0).getAccess_level()>=AccessLevels.SUPERUSER.getLevel())
+                        if(user_creator.get(0).getAccess_level()>= AccessLevels.SUPERUSER.getLevel())
                         {
                             //user creating new superuser is a superuser, create new superuser
-                            return APIController.putMVGObject(user, "users", "users_timestamp");
+                            return put(user, session_id, "users", "users_timestamp");
                         } else
                         {
                             IO.log(getClass().getName(), IO.TAG_ERROR, "User ["+user_creator.get(0).getName()+"] is not authorised to create users with this level of access. Can't create ADMIN/SUPER account.");
@@ -92,26 +91,27 @@ public class UserController
                     }
                 } else//no superusers in DB
                 {
-                    if(user.getAccess_level()==AccessLevels.ADMIN.getLevel())
+                    if(user.getAccess_level()== AccessLevels.ADMIN.getLevel())
                     {
                         //User to be created is first User in DB and is ADMIN account, throw error
                         IO.log(getClass().getName(), IO.TAG_ERROR, "Could not create ADMIN account. First account in the database must be a superuser.");
                         return new ResponseEntity<>("Could not create administrator account. First account in the database must be a superuser.", HttpStatus.NOT_FOUND);//superuser ID could not be found on db
                     } else //new User is the first superuser User, create User object
-                        return APIController.putMVGObject(user, "users", "users_timestamp");
+                        return put(user, session_id, "users", "users_timestamp");
                 }
-            } else if(user.getAccess_level() == AccessLevels.NORMAL.getLevel())//if account to be created has access rights == STANDARD
+            } else if(user.getAccess_level() == AccessLevels.STANDARD.getLevel())//if account to be created has access rights == STANDARD
             {
+                return put(user, session_id, "users", "users_timestamp");
                 //get User that's attempting to create the new Standard User object
-                List<User> user_creator = IO.getInstance().mongoOperations().find(new
+                /* List<User> user_creator = IO.getInstance().mongoOperations().find(new
                         Query(Criteria.where("usr").is(user.getCreator())), User.class, "users");
                 if(!user_creator.isEmpty())
                 {
                     //found User, check if they're authorized to create STANDARD Users
-                    if(user_creator.get(0).getAccess_level()>=AccessLevels.ADMIN.getLevel())
+                    if(user_creator.get(0).getAccess_level()>= AccessLevels.ADMIN.getLevel())
                     {
                         //user creating new STANDARD user is at least an ADMIN user, create user
-                        return APIController.putMVGObject(user, "users", "users_timestamp");
+                        return putBusinessObject(user, session_id, "users", "users_timestamp");
                     } else
                     {
                         //user creating new STANDARD user is not authorised to create user
@@ -122,9 +122,9 @@ public class UserController
                 {
                     IO.log(getClass().getName(), IO.TAG_ERROR, "Could not find account of User that's creating the new STANDARD User account.");
                     return new ResponseEntity<>("You are not authorised to create users with this level of access. Please log in with an administrator/superuser account to create standard user accounts.", HttpStatus.NOT_FOUND);//superuser ID could not be found on db
-                }
+                }*/
             } else //is a NO_ACCESS User, create object on db
-                return APIController.putMVGObject(user, "users", "users_timestamp");
+                return put(user, session_id, "users", "users_timestamp");
         } else
         {
             IO.log(getClass().getName(), IO.TAG_ERROR, "Invalid User object to be created.");
@@ -132,10 +132,18 @@ public class UserController
         }
     }
 
-    @PostMapping
-    public ResponseEntity<String> patchUser(@RequestBody User user)
+    @PostMapping(path = "/user")
+    public ResponseEntity<String> patchUser(@RequestBody User user, @RequestHeader String session_id)
     {
-        IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling User update request.");
-        return APIController.patchMVGObject(user, "users", "users_timestamp");
+        return patch(user, session_id, "users", "users_timestamp");
+    }
+
+    /**
+     * never delete by username
+     * */
+    @DeleteMapping(path = "/user/{user_id}")
+    public ResponseEntity<String> deleteUser(@PathVariable String user_id, @RequestHeader String session_id)
+    {
+        return delete(new User(user_id), session_id, "users", "users_timestamp");
     }
 }

@@ -1,5 +1,6 @@
 package server.model;
 
+import server.auxilary.AccessLevels;
 import server.auxilary.IO;
 
 /**
@@ -8,6 +9,7 @@ import server.auxilary.IO;
 public class Quote extends MVGObject
 {
     private String enquiry_id;
+    private String booking_id;
     private String client_id;
     private String contact_person_id;
     private String parent_id;
@@ -15,8 +17,27 @@ public class Quote extends MVGObject
     private double vat;
     private String account_name;
     private double revision;
-    private int status;
     public static final String TAG = "Quote";
+
+    public Quote()
+    {}
+
+    public Quote(String _id)
+    {
+        super(_id);
+    }
+
+    @Override
+    public AccessLevels getReadMinRequiredAccessLevel()
+    {
+        return AccessLevels.STANDARD;
+    }
+
+    @Override
+    public AccessLevels getWriteMinRequiredAccessLevel()
+    {
+        return AccessLevels.ADMIN;
+    }
 
     public String getEnquiry_id()
     {
@@ -26,6 +47,16 @@ public class Quote extends MVGObject
     public void setEnquiry_id(String enquiry_id)
     {
         this.enquiry_id = enquiry_id;
+    }
+
+    public String getBooking_id()
+    {
+        return booking_id;
+    }
+
+    public void setBooking_id(String booking_id)
+    {
+        this.booking_id = booking_id;
     }
 
     public String getClient_id()
@@ -56,16 +87,6 @@ public class Quote extends MVGObject
     public void setRequest(String request)
     {
         this.request = request;
-    }
-
-    public int getStatus()
-    {
-        return status;
-    }
-
-    public void setStatus(int status)
-    {
-        this.status = status;
     }
 
     public double getVat()
@@ -148,6 +169,8 @@ public class Quote extends MVGObject
             {
                 case "enquiry_id":
                     enquiry_id = (String)val;
+                case "booking_id":
+                    booking_id = (String)val;
                 case "client_id":
                     client_id = (String)val;
                     break;
@@ -156,9 +179,6 @@ public class Quote extends MVGObject
                     break;
                 case "request":
                     request = String.valueOf(val);
-                    break;
-                case "status":
-                    status = Integer.parseInt(String.valueOf(val));
                     break;
                 case "parent_id":
                     parent_id = String.valueOf(val);
@@ -189,14 +209,14 @@ public class Quote extends MVGObject
         {
             case "enquiry_id":
                 return enquiry_id;
+            case "booking_id":
+                return booking_id;
             case "client_id":
                 return client_id;
             case "contact_person_id":
                 return contact_person_id;
             case "request":
                 return request;
-            case "status":
-                return status;
             case "parent_id":
                 return parent_id;
             case "vat":

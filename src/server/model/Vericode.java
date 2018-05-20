@@ -1,5 +1,6 @@
 package server.model;
 
+import server.auxilary.AccessLevels;
 import server.auxilary.IO;
 
 /**
@@ -10,10 +11,30 @@ public class Vericode extends MVGObject
     private String code_name;
     private String code;
 
+    public Vericode()
+    {}
+
+    public Vericode(String _id)
+    {
+        super(_id);
+    }
+
     public Vericode(String code_name, String code)
     {
         setCode_name(code_name);
         setCode(code);
+    }
+
+    @Override
+    public AccessLevels getReadMinRequiredAccessLevel()
+    {
+        return AccessLevels.STANDARD;
+    }
+
+    @Override
+    public AccessLevels getWriteMinRequiredAccessLevel()
+    {
+        return AccessLevels.ADMIN;
     }
 
     public String getCode_name()

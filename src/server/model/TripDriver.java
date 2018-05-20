@@ -1,5 +1,6 @@
 package server.model;
 
+import server.auxilary.AccessLevels;
 import server.auxilary.IO;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -12,6 +13,26 @@ public class TripDriver extends MVGObject
     private String trip_id;
     private String usr;
     public static final String TAG = "TripDriver";
+
+    public TripDriver()
+    {}
+
+    public TripDriver(String _id)
+    {
+        super(_id);
+    }
+
+    @Override
+    public AccessLevels getReadMinRequiredAccessLevel()
+    {
+        return AccessLevels.STANDARD;
+    }
+
+    @Override
+    public AccessLevels getWriteMinRequiredAccessLevel()
+    {
+        return AccessLevels.ADMIN;
+    }
 
     private StringProperty trip_idProperty(){return new SimpleStringProperty(trip_id);}
 

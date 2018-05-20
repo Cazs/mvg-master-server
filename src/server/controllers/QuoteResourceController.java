@@ -14,14 +14,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.auxilary.IO;
+import server.model.MVGObject;
 import server.model.QuoteItem;
 import server.repositories.QuoteItemRepository;
 
 import java.util.List;
 
 @RepositoryRestController
-//@RequestMapping("/quotes/resources")
-public class QuoteResourceController
+public class QuoteResourceController extends APIController
 {
     private PagedResourcesAssembler<QuoteItem> pagedAssembler;
     @Autowired
@@ -34,34 +34,32 @@ public class QuoteResourceController
     }
 
     @GetMapping(path="/quotes/resources/{id}", produces = "application/hal+json")
-    public ResponseEntity<Page<QuoteItem>> getQuoteItem(@PathVariable("id") String id, Pageable pageRequest, PersistentEntityResourceAssembler assembler)
+    public ResponseEntity<Page<? extends MVGObject>> getQuoteItem(@PathVariable("id") String id,
+                                                                  @RequestHeader String session_id,
+                                                                  Pageable pageRequest,
+                                                                  PersistentEntityResourceAssembler assembler)
     {
-        IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling QuoteItem GET request id: "+ id);
-        List<QuoteItem> contents = IO.getInstance().mongoOperations().find(new Query(Criteria.where("quote_id").is(id)), QuoteItem.class, "quote_resources");
-        return new ResponseEntity(pagedAssembler.toResource(new PageImpl(contents, pageRequest, contents.size()), (ResourceAssembler) assembler), HttpStatus.OK);
+        return get(new QuoteItem(id), "_id", session_id, "quote_resources", pagedAssembler, assembler, pageRequest);
     }
 
     @GetMapping("/quotes/resources")
-    public ResponseEntity<Page<QuoteItem>> getQuoteItems(Pageable pageRequest, PersistentEntityResourceAssembler assembler)
+    public ResponseEntity<Page<? extends MVGObject>> getQuoteItems(  Pageable pageRequest,
+                                                                     @RequestHeader String session_id,
+                                                                     PersistentEntityResourceAssembler assembler)
     {
-        IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling QuoteItem GET request {all}");
-        List<QuoteItem> contents =  IO.getInstance().mongoOperations().findAll(QuoteItem.class, "quote_resources");
-        return new ResponseEntity(pagedAssembler.toResource(new PageImpl(contents, pageRequest, contents.size()), (ResourceAssembler) assembler), HttpStatus.OK);
+        return getAll(new QuoteItem(), session_id, "quote_resources", pagedAssembler, assembler, pageRequest);
     }
 
 
     @PutMapping("/quotes/resources")
-    public ResponseEntity<String> addQuoteRep(@RequestBody QuoteItem quote_item)
+    public ResponseEntity<String> addQuoteResource(@RequestHeader String session_id, @RequestBody QuoteItem quote_item)
     {
-        IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling QuoteItem creation request.");
-        //HttpHeaders headers = new HttpHeaders();
-        return APIController.putMVGObject(quote_item, "quote_resources", "quotes_timestamp");
+        return put(quote_item, session_id, "quote_resources", "quote_resources_timestamp");
     }
 
     @PostMapping("/quotes/resources")
-    public ResponseEntity<String> patchQuote(@RequestBody QuoteItem quote_item)
+    public ResponseEntity<String> patchQuoteResource(@RequestHeader String session_id, @RequestBody QuoteItem quote_item)
     {
-        IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling QuoteItem update request.");
-        return APIController.patchMVGObject(quote_item, "quote_resources", "quotes_timestamp");
+        return patch(quote_item, session_id, "quote_resources", "quote_resources_timestamp");
     }
 }

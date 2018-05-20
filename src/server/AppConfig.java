@@ -33,33 +33,21 @@ public class AppConfig  extends RepositoryRestConfigurerAdapter
     @Bean
     public EmbeddedServletContainerCustomizer containerCustomizer()
     {
-        return (container -> container.setPort(8083));
+        return (container -> container.setPort(8080));
     }
 
     @Override
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config)
     {
         config.exposeIdsFor(User.class);
-        config.exposeIdsFor(Enquiry.class);
+        // config.exposeIdsFor(TripBooking.class);
         config.exposeIdsFor(Resource.class);
-        config.exposeIdsFor(Type.class);
-        config.exposeIdsFor(ResourceType.class);
         config.exposeIdsFor(Client.class);
         config.exposeIdsFor(Quote.class);
         config.exposeIdsFor(Notification.class);
-        config.exposeIdsFor(Trip.class);
         config.exposeIdsFor(TripDriver.class);
         config.exposeIdsFor(Invoice.class);
+        // config.exposeIdsFor(AccommodationDestination.class);
+        // config.exposeIdsFor(AccommodationBooking.class);
     }
-    /*@Bean
-    public Mongo mongo() throws Exception
-    {
-        return new Mongo("localhost");
-    }
-
-    @Bean
-    public MongoTemplate mongoTemplate() throws Exception
-    {
-        return new MongoTemplate(mongo(), "bms-server");
-    }*/
 }

@@ -18,8 +18,8 @@ import server.controllers.CounterController;
 import server.exceptions.InvalidMVGObjectException;
 import server.model.MVGObject;
 import server.model.Counter;
+import server.model.Metafile;
 import server.model.User;
-import server.model.FileMetadata;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -34,7 +34,7 @@ import java.util.ArrayList;
  */
 public class RemoteComms
 {
-    public static String host = "http://192.168.0.103:8083";//192.168.0.103//95.85.57.110
+    public static String host = "http://localhost:8080"; // "http://192.168.0.103:8083";//192.168.0.103//95.85.57.110
     public static final String TAG = "RemoteComms";
     public static String DB_IP = "localhost";
     public static int DB_PORT = 27017;
@@ -47,169 +47,7 @@ public class RemoteComms
         host = h;
     }
 
-    public static boolean pingServer() throws IOException
-    {
-        URL urlConn = new URL(host);
-        HttpURLConnection httpConn =  (HttpURLConnection)urlConn.openConnection();
-
-        boolean response = (httpConn.getResponseCode() == HttpURLConnection.HTTP_OK);
-        httpConn.disconnect();
-        return response;
-    }
-
-    public static String sendGetRequest(String url, ArrayList<AbstractMap.SimpleEntry<String,String>> headers) throws IOException
-    {
-        IO.log(TAG, IO.TAG_INFO, String.format("\nGET %s HTTP/1.1\nHost: %s", url, host));
-
-        URL urlConn = new URL(host + url);
-        HttpURLConnection httpConn =  (HttpURLConnection)urlConn.openConnection();
-        for(AbstractMap.SimpleEntry<String,String> header:headers)
-            httpConn.setRequestProperty(header.getKey() , header.getValue());
-        
-        String response = null;
-        if(httpConn.getResponseCode() == HttpURLConnection.HTTP_OK)
-        {
-            response="";
-            BufferedReader in = new BufferedReader(new InputStreamReader(httpConn.getInputStream()));
-            String line="";
-            int read=0;
-            while ((line=in.readLine())!=null)
-                response += line;
-            //Log.d(TAG,response);
-        }else
-        {
-            response="";
-            BufferedReader in = new BufferedReader(new InputStreamReader(httpConn.getErrorStream()));
-            String line="";
-            int read=0;
-            while ((line=in.readLine())!=null)
-                response += line;
-            IO.logAndAlert("GET Error", response, IO.TAG_ERROR);
-        }
-
-        IO.log(TAG, IO.TAG_INFO, "GET response> " + response + "\n");
-        return response;
-    }
-
-    public static byte[] sendFileRequest(String file_url, ArrayList<AbstractMap.SimpleEntry<String,String>> headers) throws IOException
-    {
-        IO.log(TAG, IO.TAG_INFO, String.format("\nGET %s HTTP/1.1", file_url));
-
-        URL urlConn = new URL(host + file_url);
-        try(InputStream in = urlConn.openStream())
-        {
-            ByteArrayOutputStream outbytes = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            int read=0;
-            while ((read=in.read(buffer, 0, buffer.length))>0)
-                outbytes.write(buffer, 0, read);
-            outbytes.flush();
-            in.close();
-            IO.log(TAG, IO.TAG_INFO, "GET received file> " + file_url + " " + outbytes.toByteArray().length + " bytes.\n");
-            return outbytes.toByteArray();
-        }
-    }
-    
-    public static HttpURLConnection postData(String function, ArrayList<AbstractMap.SimpleEntry<String,String>> params, ArrayList<AbstractMap.SimpleEntry<String,String>> headers) throws IOException
-    {
-        URL urlConn = new URL(host + function);
-        HttpURLConnection httpConn = (HttpURLConnection)urlConn.openConnection();
-        if(headers!=null)
-            for(AbstractMap.SimpleEntry<String,String> header:headers)
-                httpConn.setRequestProperty(header.getKey() , header.getValue());
-        httpConn.setReadTimeout(10000);
-        httpConn.setConnectTimeout(15000);
-        httpConn.setRequestMethod("POST");
-        httpConn.setDoInput(true);
-        httpConn.setDoOutput(true);
-
-        //Encode body data in UTF-8 charset
-        StringBuilder result = new StringBuilder();
-        for(int i=0;i<params.size();i++)
-        {
-            AbstractMap.SimpleEntry<String,String> entry = params.get(i);
-            if(entry!=null)
-            {
-                if(entry.getKey()!=null && entry.getValue()!=null)
-                {
-                    result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
-                    result.append("=");
-                    result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
-                    result.append((i != params.size() - 1 ? "&" : ""));
-                }else return null;
-            }else return null;
-        }
-
-        IO.log(TAG, IO.TAG_INFO, String.format("POST %s HTTP/1.1\nHost: %s", function, host));
-
-        //Write to server
-        OutputStream os = httpConn.getOutputStream();
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os,"UTF-8"));
-        writer.write(result.toString());
-        writer.flush();
-        writer.close();
-        os.close();
-        
-        return httpConn;
-    }
-
-    public static HttpURLConnection postData(String function, String object, ArrayList<AbstractMap.SimpleEntry<String,String>> headers) throws IOException
-    {
-        URL urlConn = new URL(host + function);
-        HttpURLConnection httpConn = (HttpURLConnection)urlConn.openConnection();
-        if(headers!=null)
-            for(AbstractMap.SimpleEntry<String,String> header:headers)
-                httpConn.setRequestProperty(header.getKey() , header.getValue());
-        httpConn.setReadTimeout(10000);
-        httpConn.setConnectTimeout(15000);
-        httpConn.setRequestMethod("POST");
-        httpConn.setDoInput(true);
-        httpConn.setDoOutput(true);
-
-        IO.log(TAG, IO.TAG_INFO, String.format("POST %s HTTP/1.1\nHost: %s", function, host));
-
-        //Write to server
-        OutputStream os = httpConn.getOutputStream();
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os,"UTF-8"));
-        writer.write(object);
-        writer.flush();
-        writer.close();
-        os.close();
-
-        return httpConn;
-    }
-
-    public static void uploadFile(String endpoint, ArrayList<AbstractMap.SimpleEntry<String,String>> headers, byte[] file) throws IOException
-    {
-        URL urlConn = new URL(host + endpoint);
-        HttpURLConnection httpConn = (HttpURLConnection)urlConn.openConnection();
-        if(headers!=null)
-            for(AbstractMap.SimpleEntry<String,String> header:headers)
-                httpConn.setRequestProperty(header.getKey() , header.getValue());
-
-        httpConn.setRequestProperty("Content-Length", String.valueOf(file.length));
-        httpConn.setReadTimeout(10000);
-        httpConn.setConnectTimeout(15000);
-        httpConn.setRequestMethod("POST");
-        httpConn.setDoInput(true);
-        httpConn.setDoOutput(true);
-
-        IO.log(TAG, IO.TAG_INFO, String.format("POST %s HTTP/1.1\nHost: %s", endpoint, host));
-
-        //Write to server
-        OutputStream os = httpConn.getOutputStream();
-        //OutputStreamWriter writer = new OutputStreamWriter(os);
-        os.write(file);
-        os.flush();
-        os.close();
-
-        httpConn.connect();
-        String desc = IO.readStream(httpConn.getInputStream());
-        IO.log(RemoteComms.class.getName(), httpConn.getResponseCode() + ":\t" + desc, IO.TAG_INFO);
-        httpConn.disconnect();
-    }
-
-    public static String commitMVGObjectToDatabase(MVGObject MVGObject, String collection, String timestamp_name)
+    public static String commitToDatabase(MVGObject MVGObject, String collection, String timestamp_name)
     {
         if(MVGObject !=null)
         {
@@ -256,7 +94,7 @@ public class RemoteComms
      * @throws MailjetSocketTimeoutException
      * @throws MailjetException
      */
-    public static MailjetResponse emailWithAttachment(String subject, String message, User[] recipient_users, FileMetadata[] fileMetadata) throws MailjetSocketTimeoutException, MailjetException
+    public static MailjetResponse emailWithAttachment(String subject, String message, User[] recipient_users, Metafile[] fileMetadata) throws MailjetSocketTimeoutException, MailjetException
     {
         MailjetClient client;
         MailjetRequest request;
@@ -271,7 +109,7 @@ public class RemoteComms
 
         //setup files to be emailed
         JSONArray files = new JSONArray();
-        for(FileMetadata file: fileMetadata)
+        for(Metafile file: fileMetadata)
             files.put(new JSONObject()
                     .put("ContentType", file.getContent_type())
                     .put("Filename", file.getFilename())
@@ -304,7 +142,7 @@ public class RemoteComms
      * @throws MailjetSocketTimeoutException
      * @throws MailjetException
      */
-    public static MailjetResponse emailWithAttachment(String subject, String message, String[] recipient_addresses, FileMetadata[] fileMetadata) throws MailjetSocketTimeoutException, MailjetException
+    public static MailjetResponse emailWithAttachment(String subject, String message, String[] recipient_addresses, Metafile[] fileMetadata) throws MailjetSocketTimeoutException, MailjetException
     {
         MailjetClient client;
         MailjetRequest request;
@@ -321,7 +159,7 @@ public class RemoteComms
 
         //setup files to be emailed
         JSONArray files = new JSONArray();
-        for(FileMetadata file: fileMetadata)
+        for(Metafile file: fileMetadata)
             files.put(new JSONObject()
                     .put("ContentType", file.getContent_type())
                     .put("Filename", file.getFilename())

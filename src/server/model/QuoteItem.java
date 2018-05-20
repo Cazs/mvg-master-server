@@ -1,5 +1,6 @@
 package server.model;
 
+import server.auxilary.AccessLevels;
 import server.auxilary.IO;
 
 /**
@@ -15,6 +16,26 @@ public class QuoteItem extends MVGObject
     private String quote_id;
     private String resource_id;
     public static final String TAG = "QuoteItem";
+
+    public QuoteItem()
+    {}
+
+    public QuoteItem(String _id)
+    {
+        super(_id);
+    }
+
+    @Override
+    public AccessLevels getReadMinRequiredAccessLevel()
+    {
+        return AccessLevels.STANDARD;
+    }
+
+    @Override
+    public AccessLevels getWriteMinRequiredAccessLevel()
+    {
+        return AccessLevels.ADMIN;
+    }
 
     public int getItem_number()
     {

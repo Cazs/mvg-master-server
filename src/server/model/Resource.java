@@ -5,6 +5,7 @@
  */
 package server.model;
 
+import server.auxilary.AccessLevels;
 import server.auxilary.IO;
 
 /**
@@ -13,7 +14,7 @@ import server.auxilary.IO;
  */
 public class Resource extends MVGObject
 {
-    private String resource_name;
+    private String brand_name;
     private String resource_description;
     private String resource_serial;
     private String resource_type;
@@ -24,14 +25,34 @@ public class Resource extends MVGObject
     private String unit;
     public static final String TAG = "Resource";
 
-    public String getResource_name()
+    public Resource()
+    {}
+
+    public Resource(String _id)
     {
-        return resource_name;
+        super(_id);
     }
 
-    public void setResource_name(String resource_name)
+    @Override
+    public AccessLevels getReadMinRequiredAccessLevel()
     {
-        this.resource_name = resource_name;
+        return AccessLevels.STANDARD;
+    }
+
+    @Override
+    public AccessLevels getWriteMinRequiredAccessLevel()
+    {
+        return AccessLevels.ADMIN;
+    }
+
+    public String getBrand_name()
+    {
+        return brand_name;
+    }
+
+    public void setResource_name(String brand_name)
+    {
+        this.brand_name = brand_name;
     }
 
     public String getResource_description()
@@ -117,8 +138,8 @@ public class Resource extends MVGObject
     @Override
     public String[] isValid()
     {
-        if(getResource_name()==null)
-            return new String[]{"false", "invalid resource_name value."};
+        /*if(getResource_name()==null)
+            return new String[]{"false", "invalid brand_name value."};*/
         if(getResource_description()==null)
             return new String[]{"false", "invalid resource_description value."};
         if(getResource_value()<=0)
@@ -145,8 +166,8 @@ public class Resource extends MVGObject
         {
             switch (var.toLowerCase())
             {
-                case "resource_name":
-                    resource_name = (String)val;
+                case "brand_name":
+                    brand_name = (String)val;
                     break;
                 case "resource_type":
                     resource_type = (String)val;
@@ -188,8 +209,8 @@ public class Resource extends MVGObject
         switch (var.toLowerCase())
         {
             case "name":
-            case "resource_name":
-                return getResource_name();
+            case "brand_name":
+                return getBrand_name();
             case "resource_type":
                 return resource_type;
             case "resource_description":
@@ -215,7 +236,7 @@ public class Resource extends MVGObject
     @Override
     public String toString()
     {
-        return getResource_name();
+        return getResource_description();
     }
 
     @Override

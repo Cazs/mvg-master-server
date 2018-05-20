@@ -5,6 +5,7 @@
  */
 package server.model;
 
+import server.auxilary.AccessLevels;
 import server.auxilary.IO;
 
 /**
@@ -24,7 +25,28 @@ public class Client extends MVGObject
     private String account_name;
     private long date_partnered;
     private String website;
-    private boolean active;
+    public static final int STATUS_INACTIVE = 0;
+    public static final int STATUS_ACTIVE = 1;
+
+    public Client()
+    {}
+
+    public Client(String _id)
+    {
+        super(_id);
+    }
+
+    @Override
+    public AccessLevels getReadMinRequiredAccessLevel()
+    {
+        return AccessLevels.STANDARD;
+    }
+
+    @Override
+    public AccessLevels getWriteMinRequiredAccessLevel()
+    {
+        return AccessLevels.ADMIN;
+    }
 
     public String getClient_name()
     {
@@ -88,12 +110,12 @@ public class Client extends MVGObject
 
     public boolean isActive()
     {
-        return active;
+        return getStatus()==STATUS_ACTIVE;
     }
 
     public void setActive(boolean active)
     {
-        this.active = active;
+        setStatus(active ? STATUS_ACTIVE : STATUS_INACTIVE);
     }
 
     public long getDate_partnered()

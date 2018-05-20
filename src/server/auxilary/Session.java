@@ -6,6 +6,11 @@
 package server.auxilary;
 
 import org.springframework.boot.json.GsonJsonParser;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import server.model.User;
+
+import java.util.List;
 
 /**
  *
@@ -61,6 +66,24 @@ public class Session
     public String getUsr()
     {
         return usr;
+    }
+
+    public User getUser()
+    {
+        //get User from this Session object
+        List<User> users = IO.getInstance().mongoOperations().find(new Query(Criteria.where("usr").is(getUsr())), User.class, "users");
+        if(users==null)
+        {
+            IO.log(getClass().getName(), IO.TAG_ERROR, "getUser()> could not find a user associated with the username ["+getUsr()+"]");
+            return null;
+        }
+        if(users.size()!=1)//should never happen
+        {
+            IO.log(getClass().getName(), IO.TAG_ERROR, "getUser()> could not find a valid user associated with username ["+getUsr()+"]");
+            return null;
+        }
+
+        return users.get(0);
     }
     
     public void setUsr(String usr)

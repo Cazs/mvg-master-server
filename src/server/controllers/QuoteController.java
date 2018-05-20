@@ -20,8 +20,7 @@ import server.repositories.QuoteRepository;
 import java.util.List;
 
 @RepositoryRestController
-//@RequestMapping("/quotes")
-public class QuoteController
+public class QuoteController extends APIController
 {
     private PagedResourcesAssembler<Quote> pagedAssembler;
     @Autowired
@@ -34,11 +33,12 @@ public class QuoteController
     }
 
     @GetMapping(path="/quote/{id}", produces = "application/hal+json")
-    public ResponseEntity<Page<Quote>> getQuote(@PathVariable("id") String id, Pageable pageRequest, PersistentEntityResourceAssembler assembler)
+    public ResponseEntity<Page<? extends MVGObject>> getQuote(  @PathVariable("id") String id,
+                                                                @RequestHeader String session_id,
+                                                                Pageable pageRequest,
+                                                                PersistentEntityResourceAssembler assembler)
     {
-        IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Quote GET request id: "+ id);
-        List<Quote> contents = IO.getInstance().mongoOperations().find(new Query(Criteria.where("_id").is(id)), Quote.class, "quotes");
-        return new ResponseEntity(pagedAssembler.toResource(new PageImpl(contents, pageRequest, contents.size()), (ResourceAssembler) assembler), HttpStatus.OK);
+        return get(new Quote(id), "_id", session_id, "clients", pagedAssembler, assembler, pageRequest);
     }
 
     /**
@@ -49,7 +49,10 @@ public class QuoteController
      * @return Quotes for a specific Client as a JSON array object.
      */
     @GetMapping(path="/quotes/{id}", produces = "application/hal+json")
-    public ResponseEntity<Page<Quote>> getQuotesForClient(@PathVariable("id") String id, Pageable pageRequest, PersistentEntityResourceAssembler assembler)
+    public ResponseEntity<Page<? extends MVGObject>> getQuotesForClient(  @PathVariable("id") String id,
+                                                                          @RequestHeader String session_id,
+                                                                          Pageable pageRequest,
+                                                                          PersistentEntityResourceAssembler assembler)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Quotes GET request for client with ID: "+ id);
         List<Quote> contents = IO.getInstance().mongoOperations().find(new Query(Criteria.where("client_id").is(id)), Quote.class, "quotes");
@@ -57,42 +60,22 @@ public class QuoteController
     }
 
     @GetMapping("/quotes")
-    public ResponseEntity<Page<Quote>> getQuotes(Pageable pageRequest, PersistentEntityResourceAssembler assembler)
+    public ResponseEntity<Page<? extends MVGObject>> getQuotes(  @RequestHeader String session_id,
+                                                                 Pageable pageRequest,
+                                                                 PersistentEntityResourceAssembler assembler)
     {
-        IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Quote GET request {all}");
-        List<Quote> contents =  IO.getInstance().mongoOperations().findAll(Quote.class, "quotes");
-        return new ResponseEntity(pagedAssembler.toResource(new PageImpl(contents, pageRequest, contents.size()), (ResourceAssembler) assembler), HttpStatus.OK);
+        return getAll(new Notification(), session_id, "quotes", pagedAssembler, assembler, pageRequest);
     }
 
-    ////public ResponseEntity<Page<Quote>> addQuote(@RequestBody Quote quote, Pageable pageRequest, PersistentEntityResourceAssembler assembler)
-    @PutMapping("/quotes")
-    public ResponseEntity<String> addQuote(@RequestBody Quote quote)
+    @PutMapping("/quote")
+    public ResponseEntity<String> addQuote(@RequestHeader String session_id, @RequestBody Quote quote)
     {
-        IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Quote creation request.");
-        //HttpHeaders headers = new HttpHeaders();
-        return APIController.putMVGObject(quote, "quotes", "quotes_timestamp");
+        return put(quote, session_id, "quotes", "quotes_timestamp");
     }
 
-    @PostMapping("/quotes")
-    public ResponseEntity<String> patchQuote(@RequestBody Quote quote)
+    @PostMapping("/quote")
+    public ResponseEntity<String> patchQuote(@RequestHeader String session_id, @RequestBody Quote quote)
     {
-        IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Quote update request.");
-        return APIController.patchMVGObject(quote, "quotes", "quotes_timestamp");
-    }
-
-    @PostMapping(value = "/quotes/approval_request")//, consumes = "text/plain"//value =//, produces = "application/pdf"
-    public ResponseEntity<String> requestQuoteApproval(@RequestHeader String quote_id, @RequestHeader String session_id,
-                                                       @RequestHeader String message, @RequestHeader String subject,
-                                                       @RequestBody FileMetadata fileMetadata)//, @RequestParam("file") MultipartFile file
-    {
-        IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Quote approval request.");
-        return APIController.requestMVGObjectApproval(quote_id, session_id, message, subject, fileMetadata, new Quote().apiEndpoint(), Quote.class);
-    }
-
-    @GetMapping("/quotes/approve/{quote_id}/{vericode}")
-    public ResponseEntity<String> approveQuote(@PathVariable("quote_id") String quote_id, @PathVariable("vericode") String vericode)
-    {
-        IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling Quote "+quote_id+" approval request by Vericode.");
-        return APIController.approveMVGObjectByVericode(quote_id, vericode, "quotes", "quotes_timestamp", Quote.class);
+        return patch(quote, session_id, "quotes", "quotes_timestamp");
     }
 }
