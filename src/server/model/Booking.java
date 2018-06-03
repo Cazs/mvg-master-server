@@ -9,7 +9,6 @@ import server.auxilary.IO;
  */
 public class Booking extends MVGObject
 {
-    private String quote_id;
     private long departure_date; // date (and time) they left
     private long arrival_date; // date (and time) they arrived
     private long date_scheduled;
@@ -37,16 +36,6 @@ public class Booking extends MVGObject
     public AccessLevels getWriteMinRequiredAccessLevel()
     {
         return AccessLevels.ADMIN;
-    }
-
-    public String getQuote_id()
-    {
-        return quote_id;
-    }
-
-    public void setQuote_id(String quote_id)
-    {
-        this.quote_id = quote_id;
     }
 
     public long getDeparture_date()
@@ -139,9 +128,6 @@ public class Booking extends MVGObject
                 case "children_count":
                     setChildren_count(Integer.parseInt((String)val));
                     break;
-                case "quote_id":
-                    quote_id = (String)val;
-                    break;
                 case "client_id":
                     client_id = (String)val;
                     break;
@@ -174,8 +160,6 @@ public class Booking extends MVGObject
                 return adult_count;
             case "children_count":
                 return children_count;
-            case "quote_id":
-                return getQuote_id();
             case "client_id":
                 return getClient_id();
             case "departure_date":

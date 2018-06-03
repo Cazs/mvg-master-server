@@ -222,10 +222,13 @@ public abstract class MVGObject implements Serializable
     {
         if(getDate_logged()<=0)
             return new String[]{"false", "invalid date_logged value."};
-        if(getCreator()==null)
-            return new String[]{"false", "invalid creator value."};
-        if(getCreator().isEmpty())
-            return new String[]{"false", "invalid creator value."};
+        if(getClass() != User.class) // all other models must have a creator except Users, which can, but don't have to
+        {
+            if (getCreator() == null)
+                return new String[]{"false", "invalid creator value."};
+            if (getCreator().isEmpty())
+                return new String[]{"false", "invalid creator value."};
+        }
 
         return new String[]{"true", "valid "+getClass().getName()+" object."};
     }

@@ -169,24 +169,6 @@ public class User extends MVGObject
         this.gender = gender;
     }
 
-    public User getUser()
-    {
-        //get User from this Session object
-        List<User> users = IO.getInstance().mongoOperations().find(new Query(Criteria.where("usr").is(getUsr())), User.class, "users");
-        if(users==null)
-        {
-            IO.log(getClass().getName(), IO.TAG_ERROR, "getUser()> could not find a user associated with the username ["+getUsr()+"]");
-            return null;
-        }
-        if(users.size()!=1)//should never happen
-        {
-            IO.log(getClass().getName(), IO.TAG_ERROR, "getUser()> could not find a valid user associated with username ["+getUsr()+"]");
-            return null;
-        }
-
-        return users.get(0);
-    }
-
     public String getInitials(){return new String(firstname.substring(0,1) + lastname.substring(0,1));}
 
     @Override
@@ -208,8 +190,8 @@ public class User extends MVGObject
             return new String[]{"false", "invalid email value."};
         // if(getOrganisation_id()==null)
         //    return new String[]{"false", "invalid organisation_id value."};
-        if(getGender()==null)
-            return new String[]{"false", "invalid gender value."};
+        // if(getGender()==null)
+        //    return new String[]{"false", "invalid gender value."};
         if(getAccess_level()<0)
             return new String[]{"false", "invalid access_level value."};
 
