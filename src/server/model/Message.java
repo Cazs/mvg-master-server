@@ -3,32 +3,30 @@ package server.model;
 import server.auxilary.AccessLevels;
 import server.auxilary.IO;
 
-import java.io.Serializable;
-
 /**
  * Created by ghost on 2018/01/29.
  */
-public class Notification extends MVGObject
+public class Message extends MVGObject
 {
     private String subject;
     private String message;
-    private String client_id;
+    private String receiver;
     public static final String TAG = "Metafile";
 
-    public Notification()
+    public Message()
     {
     }
 
-    public Notification(String _id)
+    public Message(String _id)
     {
         super(_id);
     }
 
-    public Notification(String subject, String message, String client_id)
+    public Message(String subject, String message, String receiver)
     {
         setSubject(subject);
         setMessage(message);
-        setClient_id(client_id);
+        setReceiver(receiver);
         setStatus(0);
     }
 
@@ -64,14 +62,24 @@ public class Notification extends MVGObject
         this.message = message;
     }
 
-    public String getClient_id()
+    public String getReceiver()
     {
-        return client_id;
+        return receiver;
     }
 
-    public void setClient_id(String client_id)
+    public void setReceiver(String receiver)
     {
-        this.client_id = client_id;
+        this.receiver = receiver;
+    }
+
+    public String getTo()
+    {
+        return getReceiver();
+    }
+
+    public String getFrom()
+    {
+        return super.getCreator();
     }
 
     @Override
@@ -86,8 +94,8 @@ public class Notification extends MVGObject
             case "message":
                 message=(String)val;
                 break;
-            case "client_id":
-                client_id=(String)val;
+            case "receiver":
+                receiver =(String)val;
                 break;
             default:
                 IO.log(TAG, IO.TAG_ERROR, "unknown "+TAG+" attribute '" + var + "'");
@@ -107,8 +115,8 @@ public class Notification extends MVGObject
                     return subject;
                 case "message":
                     return message;
-                case "client_id":
-                    return client_id;
+                case "receiver":
+                    return receiver;
                 default:
                     return null;
             }
@@ -118,7 +126,7 @@ public class Notification extends MVGObject
     @Override
     public String apiEndpoint()
     {
-        return "/notifications";
+        return "/message";
     }
 }
 

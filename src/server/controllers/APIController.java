@@ -221,7 +221,7 @@ public class APIController
             Session session = SessionManager.getInstance().getUserSession(session_id);
             if(session==null)
             {
-                IO.log(APIController.class.getName(),IO.TAG_ERROR, "get()> no sessions associated with session id ["+session_id+"] were found.");
+                IO.log(APIController.class.getName(),IO.TAG_ERROR, "get() says no user sessions associated with session id ["+session_id+"] were found.");
                 return new ResponseEntity("Not a valid session. Please sign in.", HttpStatus.CONFLICT);
             }
 
@@ -229,14 +229,14 @@ public class APIController
 
             if(user==null)
             {
-                IO.log(APIController.class.getName(),IO.TAG_ERROR, "get()> no users associated with session id ["+session_id+"] were found.");
+                IO.log(APIController.class.getName(),IO.TAG_ERROR, "get() says no users associated with session id ["+session_id+"] were found.");
                 return new ResponseEntity("Not a valid session. Please sign in.", HttpStatus.CONFLICT);
             }
 
             //check if user is authorised to read objects of this type
             if(user.getAccess_level() < object.getReadMinRequiredAccessLevel().getLevel())
             {
-                IO.log(APIController.class.getName(),IO.TAG_ERROR, "get()> user ["+user.getName()
+                IO.log(APIController.class.getName(),IO.TAG_ERROR, "get() says user ["+user.getName()
                         +"]{current="+AccessLevels.values()[user.getAccess_level()]+"} is not authorised to read " + object.getClass().getName() + "{required="+object.getReadMinRequiredAccessLevel()+"} objects.");
                 return new ResponseEntity("You are not authorised to READ " + object.getClass().getSimpleName() + " objects. Minimum read requirement is " + object.getReadMinRequiredAccessLevel(), HttpStatus.UNAUTHORIZED);
             }
@@ -272,7 +272,7 @@ public class APIController
             Session session = SessionManager.getInstance().getUserSession(session_id);
             if(session==null)
             {
-                IO.log(APIController.class.getName(),IO.TAG_ERROR, "get()> no sessions associated with session id ["+session_id+"] were found.");
+                IO.log(APIController.class.getName(),IO.TAG_ERROR, "getAll() says no user sessions associated with session id ["+session_id+"] were found.");
                 return new ResponseEntity("Not a valid session. Please sign in.", HttpStatus.CONFLICT);
             }
 
@@ -280,14 +280,14 @@ public class APIController
 
             if(user==null)
             {
-                IO.log(APIController.class.getName(),IO.TAG_ERROR, "get()> no users associated with session id ["+session_id+"] were found.");
+                IO.log(APIController.class.getName(),IO.TAG_ERROR, "getAll() says no users associated with session id ["+session_id+"] were found.");
                 return new ResponseEntity("Not a valid session. Please sign in.", HttpStatus.CONFLICT);
             }
 
             //check if user is authorised to read objects of this type
             if(user.getAccess_level() < object.getReadMinRequiredAccessLevel().getLevel())
             {
-                IO.log(APIController.class.getName(),IO.TAG_ERROR, "get()> user ["+user.getName()
+                IO.log(APIController.class.getName(),IO.TAG_ERROR, "getAll() says user ["+user.getName()
                         +"]{current="+AccessLevels.values()[user.getAccess_level()]+"} is not authorised to read " + object.getClass().getName() + "{required="+object.getReadMinRequiredAccessLevel()+"} objects.");
                 return new ResponseEntity("You are not authorised to READ " + object.getClass().getSimpleName() + " objects. Minimum read requirement is " + object.getReadMinRequiredAccessLevel(), HttpStatus.UNAUTHORIZED);
             }
@@ -331,7 +331,7 @@ public class APIController
                 Session session = SessionManager.getInstance().getUserSession(session_id);
                 if (session == null)
                 {
-                    IO.log(APIController.class.getName(), IO.TAG_ERROR, "put()> no sessions associated with session [" + session_id + "] were found.");
+                    IO.log(APIController.class.getName(), IO.TAG_ERROR, "put() says no user sessions associated with session ID [" + session_id + "] were found.");
                     return new ResponseEntity<>("Not a valid session", HttpStatus.CONFLICT);
                 }
 
@@ -339,14 +339,14 @@ public class APIController
 
                 if (user == null)
                 {
-                    IO.log(APIController.class.getName(), IO.TAG_ERROR, "put()> no users associated with session [" + session_id + "] were found.");
+                    IO.log(APIController.class.getName(), IO.TAG_ERROR, "put() says no users associated with session ID [" + session_id + "] were found.");
                     return new ResponseEntity<>("Not a valid session.", HttpStatus.CONFLICT);
                 }
 
                 //check if user is authorised to create objects of this type
                 if (user.getAccess_level() < applicationObject.getWriteMinRequiredAccessLevel().getLevel())
                 {
-                    IO.log(APIController.class.getName(), IO.TAG_ERROR, "put()> user [" + user.getName()
+                    IO.log(APIController.class.getName(), IO.TAG_ERROR, "put() says user [" + user.getName()
                             + "]{current=" + AccessLevels.values()[user.getAccess_level()] + "} is not authorised to create " + applicationObject.getClass().getName() + "{required=" + applicationObject.getWriteMinRequiredAccessLevel() + "} objects.");
                     return new ResponseEntity<>("You are not authorised to CREATE " + applicationObject.getClass().getSimpleName() + " objects. Minimum write requirement is " + applicationObject.getWriteMinRequiredAccessLevel(), HttpStatus.UNAUTHORIZED);
                 }
@@ -354,7 +354,7 @@ public class APIController
             // TODO: remove below
             // applicationObject.setCreator("jivesh");
 
-            IO.log(APIController.class.getName(), IO.TAG_INFO, "attempting to create new MVGObject ["+ applicationObject.getClass().getName()+"]: "+ applicationObject.toString()+"");
+            IO.log(APIController.class.getName(), IO.TAG_INFO, "attempting to create new ["+ applicationObject.getClass().getName()+"]: "+ applicationObject.toString()+"");
 
             try
             {
@@ -403,7 +403,7 @@ public class APIController
             Session session = SessionManager.getInstance().getUserSession(session_id);
             if(session==null)
             {
-                IO.log(APIController.class.getName(),IO.TAG_ERROR, "patch()> no sessions associated with session ["+session_id+"] were found.");
+                IO.log(APIController.class.getName(),IO.TAG_ERROR, "patch() says no user sessions associated with session ID ["+session_id+"] were found.");
                 return new ResponseEntity<>("Not a valid session", HttpStatus.CONFLICT);
             }
 
@@ -411,14 +411,14 @@ public class APIController
 
             if(user==null)
             {
-                IO.log(APIController.class.getName(),IO.TAG_ERROR, "patch()> no users associated with session ["+session_id+"] were found.");
+                IO.log(APIController.class.getName(),IO.TAG_ERROR, "patch() says no users associated with session ID ["+session_id+"] were found.");
                 return new ResponseEntity<>("Not a valid session.", HttpStatus.CONFLICT);
             }
 
             //check if user is authorised to update objects of this type
             if(user.getAccess_level() < applicationObject.getWriteMinRequiredAccessLevel().getLevel())
             {
-                IO.log(APIController.class.getName(),IO.TAG_ERROR, "patch()> user ["+user.getName()
+                IO.log(APIController.class.getName(),IO.TAG_ERROR, "patch() says user ["+user.getName()
                         +"]{current="+AccessLevels.values()[user.getAccess_level()]+"} is not authorised to update " + applicationObject.getClass().getName() + "{required="+ applicationObject.getWriteMinRequiredAccessLevel()+"} objects.");
                 return new ResponseEntity<>("You are not authorised to EDIT " + applicationObject.getClass().getSimpleName() + " objects. Minimum write requirement is " + applicationObject.getWriteMinRequiredAccessLevel(), HttpStatus.UNAUTHORIZED);
             }
@@ -455,7 +455,7 @@ public class APIController
 
             if(session_id==null)
             {
-                IO.log(APIController.class.getName(),IO.TAG_ERROR, "delete()> not a valid session");
+                IO.log(APIController.class.getName(),IO.TAG_ERROR, "delete() says not a valid session");
                 return new ResponseEntity<>("Not a valid session", HttpStatus.CONFLICT);
             }
 
@@ -463,7 +463,7 @@ public class APIController
             Session session = SessionManager.getInstance().getUserSession(session_id);
             if(session==null)
             {
-                IO.log(APIController.class.getName(),IO.TAG_ERROR, "delete()> no sessions associated with session ["+session_id+"] were found.");
+                IO.log(APIController.class.getName(),IO.TAG_ERROR, "delete() says no user sessions associated with session ID ["+session_id+"] were found.");
                 return new ResponseEntity<>("Not a valid session", HttpStatus.CONFLICT);
             }
 
@@ -471,39 +471,39 @@ public class APIController
 
             if(user==null)
             {
-                IO.log(APIController.class.getName(),IO.TAG_ERROR, "delete()> no users associated with session ["+session_id+"] were found.");
+                IO.log(APIController.class.getName(),IO.TAG_ERROR, "delete() says no users associated with session ID ["+session_id+"] were found.");
                 return new ResponseEntity<>("Not a valid session.", HttpStatus.CONFLICT);
             }
 
             //check if user is authorised to delete objects of this type
             if(user.getAccess_level() < object.getWriteMinRequiredAccessLevel().getLevel())
             {
-                IO.log(APIController.class.getName(),IO.TAG_ERROR, "delete()> user ["+user.getName()
+                IO.log(APIController.class.getName(),IO.TAG_ERROR, "delete() says user ["+user.getName()
                         +"]{current="+AccessLevels.values()[user.getAccess_level()]+"} is not authorised to delete " + object.getClass().getName() + "{required="+object.getWriteMinRequiredAccessLevel()+"} objects.");
                 return new ResponseEntity<>("You are not authorised to DELETE " + object.getClass().getSimpleName() + " objects. Minimum write requirement is " + object.getWriteMinRequiredAccessLevel(), HttpStatus.UNAUTHORIZED);
             }
 
-            IO.log(APIController.class.getName(), IO.TAG_INFO, "delete()> attempting to DELETE MVGObject ["+object.get_id()+"] from collection ["+collection+"]");
+            IO.log(APIController.class.getName(), IO.TAG_INFO, "delete() says attempting to DELETE MVGObject ["+object.get_id()+"] from collection ["+collection+"]");
 
             //delete MVGObject from DB server
             if(collection!=null)
             {
                 IO.getInstance().mongoOperations().remove(new Query(Criteria.where("_id").is(object.get_id())), object.getClass(), collection);
-                IO.log(APIController.class.getName(),IO.TAG_INFO, "delete()> DELETED MVGObject: ["+object.get_id()+"]");
+                IO.log(APIController.class.getName(),IO.TAG_INFO, "delete() says DELETED MVGObject: ["+object.get_id()+"]");
             } else
             {
-                IO.log(APIController.class.getName(),IO.TAG_ERROR, "delete()> Could NOT DELETE MVGObject: ["+object.get_id()+"] due to an invalid collection name.");
+                IO.log(APIController.class.getName(),IO.TAG_ERROR, "delete() says Could NOT DELETE MVGObject: ["+object.get_id()+"] due to an invalid collection name.");
                 return null;
             }
 
             //update respective timestamp
             if(collection_timestamp!=null)
             {
-                IO.log(APIController.class.getName(),IO.TAG_INFO, "delete()> updating collection ["+collection+"]'s timestamp ["+collection_timestamp+"]");
+                IO.log(APIController.class.getName(),IO.TAG_INFO, "delete() says updating collection ["+collection+"]'s timestamp ["+collection_timestamp+"]");
                 CounterController.commitCounter(new Counter(collection_timestamp, System.currentTimeMillis()));
             } else
             {
-                IO.log(APIController.class.getName(),IO.TAG_WARN, "delete()> did not find any timestamp to update for collection ["+collection+"]");
+                IO.log(APIController.class.getName(),IO.TAG_WARN, "delete() says did not find any timestamp to update for collection ["+collection+"]");
                 return null;
             }
             return new ResponseEntity<>(object.get_id(), HttpStatus.OK);

@@ -1,5 +1,6 @@
 package server.model;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import server.auxilary.AccessLevels;
@@ -13,6 +14,7 @@ import java.util.AbstractMap;
  */
 public abstract class MVGObject implements Serializable
 {
+    @Id
     private String _id;
     private long object_number;
     private long date_logged;

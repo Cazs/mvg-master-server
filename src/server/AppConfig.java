@@ -40,14 +40,12 @@ public class AppConfig  extends RepositoryRestConfigurerAdapter
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config)
     {
         config.exposeIdsFor(User.class);
-        // config.exposeIdsFor(TripBooking.class);
+        config.exposeIdsFor(TripBooking.class);
         config.exposeIdsFor(Resource.class);
         config.exposeIdsFor(Client.class);
-        config.exposeIdsFor(Quote.class);
-        config.exposeIdsFor(Notification.class);
+        config.exposeIdsFor(Message.class);
         config.exposeIdsFor(TripDriver.class);
-        config.exposeIdsFor(Invoice.class);
-        // config.exposeIdsFor(AccommodationDestination.class);
-        // config.exposeIdsFor(AccommodationBooking.class);
+        config.exposeIdsFor(AccommodationDestination.class);
+        config.exposeIdsFor(AccommodationBooking.class);
     }
 }

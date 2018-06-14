@@ -3,6 +3,10 @@ package server.model;
 import server.auxilary.AccessLevels;
 import server.auxilary.IO;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
+
 /**
  *
  * @author ghost
@@ -35,7 +39,7 @@ public class Booking extends MVGObject
     @Override
     public AccessLevels getWriteMinRequiredAccessLevel()
     {
-        return AccessLevels.ADMIN;
+        return AccessLevels.STANDARD;
     }
 
     public long getDeparture_date()
@@ -106,6 +110,32 @@ public class Booking extends MVGObject
     public void setDate_scheduled(long date_scheduled)
     {
         this.date_scheduled = date_scheduled;
+    }
+
+    @Override
+    public String[] isValid()
+    {
+        if(getDate_scheduled() <= 0)
+            return new String[]{"false", "invalid scheduled date."};
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        // if(getDate_scheduled()/1000/60/60/24 <  calendar.getTimeInMillis()/1000/60/24)// new Date().getTime()/1000/60/60/24)
+        //    return new String[]{"false", "invalid scheduled date - cannot be in the past."};
+        if(getAdult_count() < 0)
+            return new String[]{"false", "invalid adult count."};
+        if(getChildren_count() < 0)
+            return new String[]{"false", "invalid children count."};
+        if(getAdult_count() <= 0 && getChildren_count() <= 0)
+            return new String[]{"false", "invalid adult & children count."};
+        if(getReturn_date() > 0)
+            if(getDate_scheduled() > getReturn_date())
+                return new String[]{"false", "invalid input, scheduled date cannot be after the return date."};
+        /*if(getReceiver()==null)
+            return new String[]{"false", "invalid client_id."};*/
+
+        return super.isValid();
     }
 
     @Override

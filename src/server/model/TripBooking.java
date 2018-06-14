@@ -10,11 +10,10 @@ public class TripBooking extends Booking
 {
     private String pickup_location;
     private String destination;
-    private int trip_type; // 0 = one way, 1 = return
+    private String trip_type;
     private long date_driver_assigned; // to driver
-    private String comments;
-    public static final int TRIP_TYPE_ONE_WAY = 0;
-    public static final int TRIP_TYPE_RETURN = 1;
+    private final String TRIP_TYPE_ONE_WAY = "One-Way";
+    private final String TRIP_TYPE_RETURN = "Return";
     public static final String TAG = "TripBooking";
 
     public TripBooking()
@@ -45,17 +44,17 @@ public class TripBooking extends Booking
         this.destination = destination;
     }
 
-    public int getTrip_type()
+    public String getTrip_type()
     {
         return trip_type;
     }
 
-    public String getTripType()
+    /* public String getTripType()
     {
         return getTrip_type() == TRIP_TYPE_ONE_WAY ? "One-Way" : "Return";
-    }
+    } */
 
-    public void setTrip_type(int trip_type)
+    public void setTrip_type(String trip_type)
     {
         this.trip_type = trip_type;
     }
@@ -70,14 +69,23 @@ public class TripBooking extends Booking
         this.date_driver_assigned = date_driver_assigned;
     }
 
-    public String getComments()
+    @Override
+    public String[] isValid()
     {
-        return comments;
-    }
+        if(getPickup_location() == null || getPickup_location().isEmpty())
+            return new String[]{"false", "invalid pickup address."};
+        if(getDestination() == null || getPickup_location().isEmpty())
+            return new String[]{"false", "invalid destination address."};
+        if(getTrip_type() == null || getTrip_type().isEmpty())
+            return new String[]{"false", "invalid trip_type."};
+        if(getTrip_type().equals(TRIP_TYPE_RETURN) && getReturn_date() <= 0)
+            return new String[]{"false", "invalid return date, scheduled date cannot be after the return date."};
+        if(getTrip_type().equals(TRIP_TYPE_RETURN) && getReturn_date() < getDate_scheduled())
+            return new String[]{"false", "invalid return date, return date cannot be before the scheduled date."};
+        if(getDate_driver_assigned() < 0)
+            return new String[]{"false", "invalid date_driver_assigned value."};
 
-    public void setComments(String comments)
-    {
-        this.comments = comments;
+        return super.isValid();
     }
 
     @Override
@@ -98,10 +106,7 @@ public class TripBooking extends Booking
                     setDestination((String)val);
                     break;
                 case "trip_type":
-                    setTrip_type(Integer.parseInt((String)val));
-                    break;
-                case "comments":
-                    setComments((String)val);
+                    setTrip_type((String)val);
                     break;
                 case "date_driver_assigned":
                     date_driver_assigned = Long.parseLong(String.valueOf(val));
@@ -127,27 +132,10 @@ public class TripBooking extends Booking
                 return destination;
             case "trip_type":
                 return trip_type;
-            case "comments":
-                return comments;
             case "date_driver_assigned":
                 return getDate_driver_assigned();
         }
         return super.get(var);
-    }
-
-    @Override
-    public String[] isValid()
-    {
-        if(getDestination()==null)
-            return new String[]{"false", "invalid destination value."};
-        if(getPickup_location()==null)
-            return new String[]{"false", "invalid pickup_location value."};
-        if(getTrip_type() < 0)
-            return new String[]{"false", "invalid trip_type value."};
-        if(getDate_driver_assigned()<0)
-            return new String[]{"false", "invalid date_driver_assigned value."};
-
-        return super.isValid();
     }
 
     @Override

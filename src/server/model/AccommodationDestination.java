@@ -11,20 +11,25 @@ import server.auxilary.IO;
 import java.io.Serializable;
 
 /**
- *
- * @author ghost
+ * 2018/05/15
+ * @author th3gh0st
  */
-public class AccommodationDestination extends Resource
+public class AccommodationDestination extends MVGObject
 {
+    private String name;
+    private String description;
+    private double cost_per_night_adults;
+    private double cost_per_night_children;
+    private String country;
+    private String state_province;
     private String city;
     private String town;//optional
     private String street;
     private String unit_number;
-    private String gps_coords;//optional
     private String zip_code;
+    private String gps_coords;//optional
     private double rating;
-    private String country;
-    private String state_province;
+
     public static final String TAG = "AccommodationDestination";
 
     public AccommodationDestination()
@@ -45,6 +50,46 @@ public class AccommodationDestination extends Resource
     public AccessLevels getWriteMinRequiredAccessLevel()
     {
         return AccessLevels.ADMIN;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription(String description)
+    {
+        this.description = description;
+    }
+
+    public double getCost_per_night_adults()
+    {
+        return cost_per_night_adults;
+    }
+
+    public void setCost_per_night_adults(double cost_per_night_adults)
+    {
+        this.cost_per_night_adults = cost_per_night_adults;
+    }
+
+    public double getCost_per_night_children()
+    {
+        return cost_per_night_children;
+    }
+
+    public void setCost_per_night_children(double cost_per_night_children)
+    {
+        this.cost_per_night_children = cost_per_night_children;
     }
 
     public String getCountry()
@@ -140,21 +185,29 @@ public class AccommodationDestination extends Resource
     @Override
     public String[] isValid()
     {
-        if(getRating()<0)
+        if(getName()==null || getName().isEmpty())
+            return new String[]{"false", "invalid accommodation name."};
+        if(getDescription()==null || getDescription().isEmpty())
+            return new String[]{"false", "invalid accommodation description."};
+        if(getRating() < 0)
             return new String[]{"false", "invalid rating value."};
-        if(getCountry()==null)
+        if(getCost_per_night_adults() < 0)
+            return new String[]{"false", "invalid cost_per_night_adults value."};
+        if(getCost_per_night_children() < 0)
+            return new String[]{"false", "invalid cost_per_night_children value."};
+        if(getCountry() == null || getCountry().isEmpty())
             return new String[]{"false", "invalid country value."};
-        if(getState_province()==null)
+        if(getState_province() == null || getState_province().isEmpty())
             return new String[]{"false", "invalid province_state value."};
-        if(getCity()==null)
+        if(getCity() == null || getCity().isEmpty())
             return new String[]{"false", "invalid city value."};
-        if(getTown()==null)
-            return new String[]{"false", "invalid town value."};
-        if(getStreet()==null)
+        /*if(getTown() == null || getTown().isEmpty())
+            return new String[]{"false", "invalid town value."};*/
+        if(getStreet() == null || getStreet().isEmpty())
             return new String[]{"false", "invalid street value."};
-        if(getUnit_number()==null)
+        if(getUnit_number() == null || getUnit_number().isEmpty())
             return new String[]{"false", "invalid unit_number value."};
-        if(getZip_code()==null)
+        if(getZip_code() == null || getZip_code().isEmpty())
             return new String[]{"false", "invalid zip_code value."};
 
         return super.isValid();
@@ -240,12 +293,12 @@ public class AccommodationDestination extends Resource
     @Override
     public String toString()
     {
-        return getResource_description();
+        return getName() + " :=> " + getDescription();
     }
 
     @Override
     public String apiEndpoint()
     {
-        return "/accommodation";
+        return "/destination";
     }
 }

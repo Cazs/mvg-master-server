@@ -19,9 +19,9 @@ import server.repositories.AccommodationDestinationRepository;
 @RepositoryRestController
 public class AccommodationDestinationController extends APIController
 {
-    private PagedResourcesAssembler<AccommodationDestination> pagedAssembler;
-    @Autowired
-    private AccommodationDestinationRepository destinationRepository;
+     private PagedResourcesAssembler<AccommodationDestination> pagedAssembler;
+     @Autowired
+     private AccommodationDestinationRepository destinationRepository;
 
     @Autowired
     public AccommodationDestinationController(PagedResourcesAssembler<AccommodationDestination> pagedAssembler)
@@ -35,7 +35,7 @@ public class AccommodationDestinationController extends APIController
                                                                          Pageable pageRequest,
                                                                          PersistentEntityResourceAssembler assembler)
     {
-        return get(new AccommodationDestination(id), "_id", session_id, "destinations", pagedAssembler, assembler, pageRequest);
+        return get(new AccommodationDestination(id), "_id", session_id, "accommodation_destinations", pagedAssembler, assembler, pageRequest);
     }
 
     @GetMapping("/destinations")
@@ -43,24 +43,24 @@ public class AccommodationDestinationController extends APIController
                                                                           Pageable pageRequest,
                                                                           PersistentEntityResourceAssembler assembler)
     {
-        return getAll(new AccommodationDestination(), session_id, "destinations", pagedAssembler, assembler, pageRequest);
+        return getAll(new AccommodationDestination(), session_id, "accommodation_destinations", pagedAssembler, assembler, pageRequest);
     }
 
     @PutMapping("/destination")
     public ResponseEntity<String> addAccommodationDestination(@RequestBody AccommodationDestination destination, @RequestHeader String session_id)
     {
-        return put(destination, session_id, "destinations", "destinations_timestamp");
+        return put(destination, session_id, "accommodation_destinations", "accommodation_destinations_timestamp");
     }
 
     @PostMapping("/destination")
     public ResponseEntity<String> patchAccommodationDestination(@RequestBody AccommodationDestination destination, @RequestHeader String session_id)
     {
-        return patch(destination, session_id, "destinations", "destinations_timestamp");
+        return patch(destination, session_id, "accommodation_destinations", "accommodation_destinations_timestamp");
     }
 
     @DeleteMapping(path="/destination/{destination_id}")
     public ResponseEntity<String> delete(@PathVariable String destination_id, @RequestHeader String session_id)
     {
-        return delete(new AccommodationDestination(destination_id), session_id, "destinations", "destinations_timestamp");
+        return delete(new AccommodationDestination(destination_id), session_id, "accommodation_destinations", "accommodation_destinations_timestamp");
     }
 }

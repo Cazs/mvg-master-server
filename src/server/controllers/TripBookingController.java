@@ -27,7 +27,7 @@ public class TripBookingController extends APIController
         this.pagedAssembler = pagedAssembler;
     }
 
-    @GetMapping(path="/trip/{id}", produces = "application/hal+json")
+    @GetMapping(path="/bookings/trip/{id}", produces = "application/hal+json")
     public ResponseEntity<Page<? extends MVGObject>> getTripBooking(@PathVariable("id") String id,
                                               @RequestHeader String session_id,
                                               Pageable pageRequest,
@@ -43,7 +43,7 @@ public class TripBookingController extends APIController
      * @param assembler
      * @return JSON array of TripBookings for that specific client/organisation.
      */
-    @GetMapping(path="/trips/{client_id}", produces = "application/hal+json")
+    @GetMapping(path="/bookings/trips/{client_id}", produces = "application/hal+json")
     public ResponseEntity<Page<? extends MVGObject>> getTripBookingsForClient(@PathVariable("client_id") String client_id,
                                                                        @RequestHeader String session_id,
                                                                        Pageable pageRequest,
@@ -52,7 +52,7 @@ public class TripBookingController extends APIController
         return get(new TripBooking(client_id), "client_id", session_id, "trips", pagedAssembler, assembler, pageRequest);
     }
 
-    @GetMapping("/trips")
+    @GetMapping("/bookings/trips")
     public ResponseEntity<Page<? extends MVGObject>> getTripBookings(Pageable pageRequest,
                                                               @RequestHeader String session_id,
                                                               PersistentEntityResourceAssembler assembler)
@@ -60,21 +60,22 @@ public class TripBookingController extends APIController
         return getAll(new TripBooking(), session_id, "trips", pagedAssembler, assembler, pageRequest);
     }
 
-    @PutMapping("/trip")
+    @PutMapping("/bookings/trips")
     public ResponseEntity<String> addTripBooking(@RequestBody TripBooking trip,
                                           @RequestHeader String session_id)
     {
-        return put(trip, session_id, "trips", "trips_timestamp");
+        return put(trip, session_id, "trips", "trip_bookings_timestamp");
     }
 
-    @PostMapping("/trips")
+    @PostMapping("/bookings/trips")
     public ResponseEntity<String> patchTripBooking(@RequestBody TripBooking trip,
                                             @RequestHeader String session_id)
     {
-        return patch(trip, session_id, "trips", "trips_timestamp");
+        System.out.println("Handling trip booking update: " + trip.getPickup_location());
+        return patch(trip, session_id, "trips", "trip_bookings_timestamp");
     }
 
-    @PostMapping(value = "/trips/approval_request")//, consumes = "text/plain"//value =//, produces = "application/pdf"
+    @PostMapping(value = "/bookings/trips/approval_request")//, consumes = "text/plain"//value =//, produces = "application/pdf"
     public ResponseEntity<String> requestTripBookingApproval(@RequestHeader String trip_id, @RequestHeader String session_id,
                                                        @RequestHeader String message, @RequestHeader String subject,
                                                        @RequestBody Metafile metafile)//, @RequestParam("file") MultipartFile file
@@ -83,11 +84,10 @@ public class TripBookingController extends APIController
         return requestApproval(trip_id, session_id, message, subject, metafile, new TripBooking().apiEndpoint(), TripBooking.class);
     }
 
-    @GetMapping("/trips/approve/{trip_id}/{vericode}")
-    public ResponseEntity<String> approveTripBooking(@PathVariable("trip_id") String trip_id,
-                                              @PathVariable("vericode") String vericode)
+    @GetMapping("/bookings/trips/approve/{trip_id}/{vericode}")
+    public ResponseEntity<String> approveTripBooking(@PathVariable("trip_id") String trip_id, @PathVariable("vericode") String vericode)
     {
         IO.log(getClass().getName(), IO.TAG_INFO, "\nhandling TripBooking "+trip_id+" approval by Vericode.");
-        return approveByVericode(trip_id, vericode, "trips", "trips_timestamp", TripBooking.class);
+        return approveByVericode(trip_id, vericode, "trips", "trip_bookings_timestamp", TripBooking.class);
     }
 }

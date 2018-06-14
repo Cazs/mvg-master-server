@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
+import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,12 +12,12 @@ import server.model.MVGObject;
 import server.model.AccommodationBooking;
 import server.repositories.AccommodationBookingRepository;
 
-@RestController
+@RepositoryRestController
 public class AccommodationBookingController extends APIController
 {
     private PagedResourcesAssembler<AccommodationBooking> pagedAssembler;
-    //@Autowired
-    //private AccommodationBookingRepository accommodationRepository;
+    @Autowired
+    private AccommodationBookingRepository accommodationRepository;
 
     @Autowired
     public AccommodationBookingController(PagedResourcesAssembler<AccommodationBooking> pagedAssembler)
